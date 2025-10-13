@@ -1,0 +1,87 @@
+ion-toolbar {
+  --background: var(--ion-color-primary);
+
+}
+
+/* ===== Resumen del día ===== */
+.resumen-dia {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.resumen-row h2 {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.resumen-valores {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.resumen-valores h3.valor {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--ion-color-success);
+}
+
+.resumen-valores p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* ===== Filtros ===== */
+.filtros {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+ion-chip {
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* ===== Lista de ventas ===== */
+.ventas-lista {
+  margin: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.venta-card {
+  border-bottom: 1px solid #e5e7eb;
+  --padding-start: 16px;
+  --inner-padding-end: 16px;
+}
+
+.venta-card h3 {
+  font-size: 1rem;
+  margin: 0;
+  color: #111827;
+}
+
+.venta-card p {
+  margin: 2px 0;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.venta-card .iva {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.venta-card .total {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ion-color-primary);
+}

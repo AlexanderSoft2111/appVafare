@@ -1,0 +1,51 @@
+table {
+    width: 100%;
+  }
+
+  .mat-form-field {
+    font-size: 14px;
+    width: 100%;
+  }
+
+  td, th {
+    width: auto;
+    max-width: 100px;
+    min-width: 50px;
+    text-align: center !important;
+  }
+
+  th {
+    font-weight: bold;
+  }
+
+  .button-next {
+
+    --background: linear-gradient( 90deg , #122b44 0%, #596571 100%);
+    width: 200px;
+    margin-bottom: 20px;
+    color: white !important;
+    margin-left: auto;
+    border-radius: 8px;
+
+}
+
+.btnCliente{
+    padding: 0;
+}
+
+.custom-paginator {
+  background-color: #f8f9fa; // Gris claro
+  font-size: 0.875rem;
+
+  .form-select-sm {
+    min-width: 60px;
+  }
+
+  .btn-group .btn {
+    width: 32px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}

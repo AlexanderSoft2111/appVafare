@@ -1,0 +1,80 @@
+.full-width {
+    width: 100%;
+}
+    
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.col {
+  flex: 1;
+  margin-right: 20px;
+  margin-bottom: 8px;
+}
+
+.col:last-child {
+  margin-right: 0;
+}
+
+
+.card-content {
+    background: white;
+    margin: 10px;
+    border-radius: 10px;
+    border: 1px solid #bebfc1;
+}
+
+.button-next {
+    
+    --background: linear-gradient(to right, #e53935 0%, #e35d5b  51%, #e53935  100%);
+    max-width: 200px;
+    margin-bottom: 10px;
+    color: white !important;
+    margin-left: auto;
+    border-radius: 8px; 
+    
+}
+
+.icon-person {
+    font-size: 40px;
+    color: white;
+    background: #4CB8C4;  /* fallback for old browsers */
+    background: -webkit-linear-gradient(to bottom, #3CD3AD, #4CB8C4);  /* Chrome 10-25, Safari 5.1-6 */
+    background: linear-gradient(to bottom, #3CD3AD, #4CB8C4); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    padding: 15px;
+    border-radius: 50%;
+}
+
+.item-maps {
+    --background: #fff0b6; 
+    border-radius: 15px; 
+    margin: 10px;
+}
+  
+input {
+    border: solid #b0bec5 1px;
+    border-radius: 10px;
+    padding: 10px;
+    margin: -5px 0px 0px -5px;
+}
+
+textarea {
+    border: solid #b0bec5 1px;
+    border-radius: 10px;
+    padding: 10px !important;
+    margin: -5px 0px 0px -5px !important;
+}
+
+ion-menu-button {
+    color: var(--ion-color-primary);
+  }
+
+.red{
+    color: red;
+}  
+
+.black{
+    color: black;
+}

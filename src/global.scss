@@ -1,0 +1,111 @@
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import '@ionic/angular/css/display.css';
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+@import '@angular/material/prebuilt-themes/deeppurple-amber.css';
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,800;1,300&display=swap');
+
+ion-content, ion-footer {
+    --background: #eff5ff;
+    background: #eff5ff;
+}
+
+ion-toolbar {
+    --background: #eff5ff !important;
+}
+
+// ----- TIPO DE LETRAS ----- //
+h2, h1, h3, h4, h5, p, th, td, ion-title, ion-label, ion-list-header, input, ion-input {
+    font-family: var(--font) !important;
+}
+
+p {
+    color: black;
+    font-family: var(--font) !important;
+    font-size: 14px;
+}
+
+.normal {
+    color: var(--text-color-normal);
+    font-family: var(--font) !important;
+    font-size: 14px !important;
+    white-space: normal;
+    font-weight: normal !important;
+}
+
+.aviso {
+    font-size: 14px !important;;
+    font-family: var(--font);
+    text-align: center !important;
+    position: fixed;
+}
+
+.none {
+    --background: none !important;
+    background: none !important;
+}
+
+.white {
+    color: white !important;
+}
+
+.popoverCss {
+    --width: 300px;
+}
+
+.popoverCssCliente{
+    --width: 400px;
+    --position: absolute;
+    top: -20px;
+    left: 180px;
+}
+
+.ticket-modal{
+  // ticket-print.component.scss
+:host {
+  --width: 100% !important;
+  --max-width: 100% !important;
+  --height: 100% !important;
+  --max-height: 100% !important;
+}
+
+.ticket-container {
+  width: 280px;
+  margin: auto;
+  padding: 10px;
+}
+}
+
+/* ancho del popover */
+.popoverCssProducto {
+  --width: 920px;        /* desktop */
+  --max-width: 95vw;     /* no exceder viewport */
+  --height: auto;
+  --max-height: 95vh;    /* por si acaso */
+  --backdrop-opacity: .25;
+}
+
+/* en pantallas pequeñas, que use casi todo el ancho */
+@media (max-width: 899px) {
+  .popoverCssProducto {
+    --width: 94vw;
+    --max-width: 94vw;
+  }
+}
+
+
+.native-input {
+    padding: 5px !important;
+}

@@ -1,0 +1,66 @@
+table {
+    width: 100%;
+  }
+
+  .mat-form-field {
+    font-size: 14px;
+    width: 100%;
+  }
+
+
+  td, th {
+    width: auto;
+    max-width: 100px;
+    min-width: 50px;
+    text-align: center !important;
+  }
+
+  th {
+    font-weight: bold;
+  }
+
+.red{
+  background: #dc3545;
+
+  td{
+    color: white !important;
+
+  }
+
+}
+
+.yellow{
+  background: #ffc107;
+}
+
+.orange{
+  background: #fc9700;
+
+  td{
+    color: white !important;
+
+  }
+}
+
+  .button-next {
+
+    --background: linear-gradient( 90deg , #122b44 0%, #596571 100%);
+    width: 200px;
+    margin-bottom: 20px;
+    color: white !important;
+    margin-left: auto;
+    border-radius: 8px;
+
+}
+
+.btnCliente{
+    padding: 0;
+}
+
+.groupBotones{
+      display: flex;
+    justify-content: right;
+}
+
+
+

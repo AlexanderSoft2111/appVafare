@@ -1,0 +1,62 @@
+
+
+<ion-item style="--background: #7a9ebd">
+  <ion-label>
+    <strong>Agregar producto</strong>
+  </ion-label>
+  <ion-buttons slot="end">
+    <ion-button (click)="add()">
+      <ion-icon slot="icon-only" name="checkbox" color="success"></ion-icon>
+    </ion-button>
+    <ion-button (click)="close()">
+      <ion-icon slot="icon-only" name="close" color="dark"></ion-icon>
+    </ion-button>
+  </ion-buttons>
+</ion-item>
+
+<ion-card class="m-0 pb-2" style="background: #f8f9fa;">
+  <ion-grid>
+
+
+        <ion-row class="ion-justify-content-center">
+
+            <ion-col sizeXs="12" sizeSm="10" class="m-0 p-0">
+
+
+                    <div class="row">
+                        <div class="col">
+                          <ion-item class="none">
+                            <ion-label position="floating">Nombre</ion-label>
+                            <ion-input [(ngModel)]="producto.nombre" class="normal" matInput></ion-input>
+                          </ion-item>
+                        </div>
+                    </div>
+
+                  <div class="row">
+                      <div class="col">
+                        <ion-item class="none">
+                          <ion-label position="floating">PVP</ion-label>
+                          <ion-input class="normal" matInput type="number"
+                          placeholder="0"
+                          [(ngModel)]="producto.pvp"></ion-input>
+                        </ion-item>
+                       </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col">
+                      <ion-item class="none">
+                        <ion-label>Tiene IVA?</ion-label>
+                        <ion-checkbox [(ngModel)]="producto.check_iva"></ion-checkbox>
+                      </ion-item>
+                     </div>
+                </div>
+            </ion-col>
+
+        </ion-row>
+
+
+  </ion-grid>
+</ion-card>
+
+

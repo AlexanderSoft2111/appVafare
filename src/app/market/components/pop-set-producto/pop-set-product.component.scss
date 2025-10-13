@@ -1,0 +1,72 @@
+.button-next {
+   --background: linear-gradient(90deg, #6dacff 0%, #1a73e8 100%);
+  max-width: 200px;
+  //margin-bottom: 10px;
+  color: white !important;
+  margin-left: auto;
+  border-radius: 8px;
+}
+
+.boton-primario {
+  // --background: #f09419;
+  color: black;
+  border: solid;
+  border-width: 2px;
+  border-color: #F7B439 !important;
+  border-radius: 5px;
+  background: #f9f4ed91;
+  text-transform: none;
+  font-weight: bold;
+}
+
+
+/* En pantallas pequeñas, que ocupen su ancho natural (no full-width) */
+.actions-right {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Si algún ion-col los estira, asegúrate de no forzar 100% */
+ion-col .actions-right ion-button { width: auto; }
+
+
+.full-width {
+  width: 100%;
+  margin-left: 4%;
+}
+
+.item-native {
+  margin-top: 1%;
+  margin-bottom: 5%;
+  width: 100%;
+}
+
+
+/* Asegura que cada mat-form-field llene su columna */
+.field { width: 100%; }
+
+
+/* cada form-field ocupa todo el ancho de su columna */
+ion-col { display: flex; }
+ion-col mat-form-field { width: 100%; }
+
+/* centrar verticalmente el suffix del checkbox dentro del form-field (MDC) */
+.iva-field .mat-mdc-form-field-icon-suffix,
+.iva-field .mat-mdc-form-field-text-suffix {
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+.iva-suffix { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+
+/* opcional: compactar paddings del grid dentro del popover */
+ion-grid { --ion-grid-padding: 8px; }
+ion-col  { --ion-grid-column-padding: 8px; }
+
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title><strong>Reporte</strong></ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large"><strong>Reporte</strong></ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- Resumen del día -->
+  <div class="resumen-dia mat-elevation-z4 m-2">
+
+      <ion-grid >
+          <ion-row class="ion-align-items-center resumen-row">
+            <ion-col>
+              <h2>Hoy</h2>
+            </ion-col>
+            <ion-col  size="auto">
+                  @if (!vendedor) {
+                      <ion-chip color="dark" (click)="resetReport()">
+                        <ion-label>Reiniciar</ion-label>
+                        <ion-icon name="refresh-circle"></ion-icon>
+                      </ion-chip>
+
+                  }
+            </ion-col>
+          </ion-row>
+
+      <ion-row class="resumen-valores">
+        <ion-col>
+          <h3 class="valor">${{ valores.total.toFixed(2) }}</h3>
+          <p>Total</p>
+        </ion-col>
+        <ion-col>
+          <h3 class="valor">${{ valores.iva.toFixed(2) }}</h3>
+          <p>IVA</p>
+        </ion-col>
+        <ion-col>
+          <h3 class="valor">{{ valores.numVentas }}</h3>
+          <p>Ventas</p>
+        </ion-col>
+      </ion-row>
+
+      </ion-grid>
+    </div>
+
+    <!-- Lista de ventas -->
+  <ion-list class="ventas-lista mat-elevation-z2">
+    @for (venta of ventas; track venta.id) {
+      <ion-item button detail="true" (click)="openModalVenta(venta)" class="venta-card">
+        <ion-label>
+          <h3><strong>{{ venta.cliente.nombre }}</strong></h3>
+          <p>{{ venta.fecha | date:'short' }}</p>
+          <p>{{ venta.productos.length }} productos</p>
+        </ion-label>
+        <div slot="end" class="text-right">
+          <p class="iva">IVA: ${{ venta.iva.toFixed(2) }}</p>
+          <p class="total">Total: ${{ venta.total.toFixed(2) }}</p>
+        </div>
+      </ion-item>
+    }
+  </ion-list>
+
+</ion-content>
+

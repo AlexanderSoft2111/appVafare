@@ -1,0 +1,50 @@
+
+<ion-app>
+
+   <ion-split-pane contentId="main-content">
+
+    <ion-menu contentId="main-content" type="overlay">
+      <ion-content style="background: linear-gradient(90deg, rgba(126,0,46,1) 39%, rgba(43,25,37,0.9867297260701156) 88%);">
+        <ion-list class="p-0 none" style="border-bottom: 1px solid var(--ion-color-step-150, #d7d8da);">
+          <ion-item class="none" lines="none" detail="false">
+              <ion-icon class="white" slot="start" name="storefront-outline"></ion-icon>
+             <ion-label class="white"><strong>MINIMARKET</strong></ion-label>
+             <ion-label class="white"><strong>{{rol}}</strong></ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-list class="p-0 none" id="inbox-list">
+          <ion-item class="none" lines="none" detail="false">
+            <ion-label class="white"><strong>Menú</strong></ion-label>
+          </ion-item>
+
+          <ion-menu-toggle auto-hide="false">
+
+            @for (p of appPages; track $index) {
+              <ion-item class="none" routerDirection="root" [routerLink]="[p.url]" lines="none" detail="false" routerLinkActive="selected">
+                <ion-icon class="white" slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
+                <ion-label class="white">{{ p.title }}</ion-label>
+              </ion-item>
+            }
+
+          </ion-menu-toggle>
+
+          @if (authState) {
+            <ion-menu-toggle auto-hide="false" (click)="salir()">
+              <ion-item class="none" routerDirection="root" routerLink="/market/login" lines="none" detail="false" routerLinkActive="selected">
+                <ion-icon class="white" slot="start" ios="exit" md="exit"></ion-icon>
+                <ion-label class="white">Cerrar Sesión</ion-label>
+              </ion-item>
+            </ion-menu-toggle>
+          }
+
+        </ion-list>
+
+      </ion-content>
+    </ion-menu>
+
+
+    <ion-router-outlet id="main-content"></ion-router-outlet>
+  </ion-split-pane>
+
+</ion-app>

@@ -1,0 +1,113 @@
+<form [formGroup]="miFormulario" (ngSubmit)=guardar()>
+  <ion-card class="m-0 none">
+    <ion-item detail="false" class="none item-native">
+      <ion-label class="text-center">
+        <strong>{{titulo}}</strong>
+      </ion-label>
+      <ion-buttons slot="end">
+        @if (venta) {
+        <ion-button (click)="aceptar()">
+          <ion-icon slot="icon-only" name="checkbox" color="success"></ion-icon>
+        </ion-button>
+        }
+        <ion-button (click)="close()">
+          <ion-icon slot="icon-only" name="close" color="dark"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-item>
+
+
+    <mat-form-field class="normal" appearance="outline" class="full-width">
+      <mat-label>Cédula o Ruc:</mat-label>
+      <input matInput class="normal" maxlength="13" formControlName="ruc" (blur)="validarRucUnico()" autocomplete="off">
+
+      @if (campoNoValido('ruc')) {
+      <mat-error>
+        La cédula <strong>es requerida</strong>
+      </mat-error>
+      }
+      @if (rucDuplicado()) {
+      <mat-error>
+        Ya existe <strong>un cliente con este RUC</strong>
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombres:</mat-label>
+      <input matInput class="normal" formControlName="nombre" autocomplete="off">
+      @if (campoNoValido('nombre')) {
+      <mat-error class="normal">
+        El nombre <strong>es requerido</strong>
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Dirección:</mat-label>
+      <input matInput class="normal" formControlName="direccion" autocomplete="off">
+      @if (campoNoValido('direccion')) {
+      <mat-error class="normal">
+        La dirección <strong>es requerida</strong>
+      </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Teléfono:</mat-label>
+      <input matInput class="normal" formControlName="telefono" autocomplete="off" maxlength="10">
+      @if (campoNoValido('telefono')) {
+        <mat-error class="normal">
+          El teléfono <strong>es requerido</strong>
+        </mat-error>
+      }
+      @if (telefonoPatternInvalido()) {
+        <mat-error>
+          Ingrese un <strong>número de celular válido</strong>
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email:</mat-label>
+      <input matInput class="normal" formControlName="email" autocomplete="off">
+
+      @if (campoNoValido('email')) {
+      <mat-error>
+        El email <strong>es requerido</strong>
+      </mat-error>
+      }
+      @if (emailPatternInvalido()) {
+      <mat-error>
+        Ingrese un <strong>email válido</strong>
+      </mat-error>
+      }
+
+    </mat-form-field>
+
+    <ion-grid class="none">
+      <ion-row class="ion-justify-content-end">
+        <ion-col size="auto">
+          <ion-button class="normal" color="dark" (click)="cancelar()">
+            cancelar
+          </ion-button>
+        </ion-col>
+        <ion-col size="auto">
+          @if (!update) {
+          <ion-button [disabled]="rucDuplicado() || isSaving"
+            fill="clear" (click)="guardar()" class="normal boton-primario">
+            ok
+          </ion-button>
+          } @else {
+          <ion-button [disabled]="rucDuplicado() || isSaving"
+            fill="clear" (click)="updateClient()" class="normal boton-primario">
+            Actualizar
+          </ion-button>
+          }
+
+        </ion-col>
+
+      </ion-row>
+    </ion-grid>
+  </ion-card>
+</form>

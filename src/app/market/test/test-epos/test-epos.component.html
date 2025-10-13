@@ -1,0 +1,19 @@
+ <div style="font-family:system-ui;max-width:640px;margin:24px auto;padding:16px;border:1px solid #e5e5e5;border-radius:12px">
+    <h2 style="margin:0 0 12px">Test TM-m30II (DEV)</h2>
+    <p style="margin:0 0 12px;line-height:1.5">
+      IP: <b>{{IP}}</b> · Puerto: <b>{{PORT}}</b> · crypto: <b>{{CRYPTO}}</b> · DeviceID: <b>{{DEVICE_ID}}</b>
+    </p>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <button (click)="connect()" [disabled]="busy || !!printer" style="padding:8px 12px">Connect</button>
+      <button (click)="printHello()" [disabled]="busy || !printer" style="padding:8px 12px">Print "Hello"</button>
+      <button (click)="checkStatus()" [disabled]="busy || !printer" style="padding:8px 12px">Check Status</button>
+     <!--  <button (click)="disconnect()" [disabled]="busy || !ePosDev" style="padding:8px 12px">Disconnect</button> -->
+      <button (click)="printViaEposPrint()" style="padding:8px 12px">Prueba</button>
+    </div>
+
+    <pre style="background:#0f172a;color:#e5e7eb;padding:12px;border-radius:8px;white-space:pre-wrap;max-height:300px;overflow:auto">{{log}}</pre>
+  </div>
+
+
+

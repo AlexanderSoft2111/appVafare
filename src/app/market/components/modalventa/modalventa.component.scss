@@ -1,0 +1,70 @@
+ion-toolbar {
+  --background: #f9fafb;
+  --color: #111827;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.seccion {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.seccion h2 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+}
+
+.col {
+  flex: 1;
+  min-width: 250px;
+}
+
+.precio-final {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: #111;
+  color: #facc15;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.tabla {
+  width: 100%;
+  margin-top: 12px;
+}
+
+th.mat-header-cell {
+  background: #f1f5f9;
+  color: #374151;
+  font-weight: 700;
+}
+
+td.mat-cell {
+  padding: 8px;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.totales {
+  text-align: right;
+  margin-left: auto;
+}
+
+.totales p {
+  margin: 4px 0;
+}
+
+.totales .total {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--ion-color-success);
+}

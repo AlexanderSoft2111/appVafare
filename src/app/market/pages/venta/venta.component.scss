@@ -1,0 +1,85 @@
+ion-input {
+    background: white;
+    border-radius: 5px;
+}
+
+.icon-add {
+    color: white;
+    display: inline-table;
+    font-size: 20px;
+    background: #28a745;
+}
+
+
+.icon-remove {
+    color: white;
+    display: inline-table;
+    font-size: 20px;
+    background: red;
+}
+
+.cantidad {
+    display: inline-table;
+}
+
+.content-total {
+    background: black !important;
+    border-radius: 5px;
+    padding: 0px 10px 0px 0px;
+}
+
+.total {
+    text-align: end;
+    font-size: 50px;
+    margin: 0px;
+    color: #ecb611;
+    font-weight: bold;
+}
+
+.pago {
+    font-size: 35px;
+    font-weight: bold;
+    color: #ecb611;
+    margin: 0px;
+}
+
+.vuelto-input {
+    padding: 0px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+    margin-left: 25px !important;
+}
+
+input {
+    padding: 4px !important;
+}
+
+.qty-col {
+  display: flex;              /* 👉 todos en una fila */
+  align-items: center;        /* centra verticalmente */
+  gap: 8px;                   /* espacio entre iconos e input */
+  width: 100%;                /* respeta el ancho del ion-col */
+}
+
+.qty-col > ion-icon {
+  flex: 0 0 auto;             /* no se estiran */
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--ion-color-medium);
+}
+
+.qty-col > ion-input.qty-input {
+  flex: 1 1 auto;             /* 👉 el input ocupa el restante */
+  min-width: 0;               /* evita overflow en flex */
+  text-align: center;
+  --padding-start: 8px;       /* paddings internos del ion-input */
+  --padding-end: 8px;
+  --background: #fff;         /* opcional: estilos del input */
+  --border-radius: 6px;
+}
+
+.full-width {
+  width: 100%;
+  margin-top: 10px;
+}

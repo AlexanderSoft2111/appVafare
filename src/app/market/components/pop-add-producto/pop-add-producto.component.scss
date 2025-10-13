@@ -1,0 +1,38 @@
+.full-width {
+    width: 100%;
+}
+    
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.col {
+  flex: 1;
+  padding: 0px !important;
+  margin: 0px !important;;
+}
+
+
+
+.card-content {
+    background: white;
+    margin: 10px;
+    border-radius: 10px;
+    border: 1px solid #bebfc1;
+}
+
+
+input {
+    border: solid #b0bec5 1px;
+    border-radius: 10px;
+    padding: 10px;
+    margin: -5px 0px 0px -5px;
+}
+
+
+ion-label {
+  font-size: 14px !important;
+  font-weight: bold;
+}
+  

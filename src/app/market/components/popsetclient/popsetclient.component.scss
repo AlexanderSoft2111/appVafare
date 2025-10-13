@@ -1,0 +1,35 @@
+.button-next {
+    --background: linear-gradient(90deg, #6dacff 0%, #1a73e8 100%);
+    max-width: 200px;
+    margin-bottom: 10px;
+    color: white !important;
+    margin-left: auto;
+    border-radius: 8px;
+}
+
+.boton-primario {
+    // --background: #f09419;
+    color: black;
+    border: solid;
+    border-width: 2px;
+    border-color: #F7B439 !important;
+    padding: 5px 13px 5px 13px;
+    border-radius: 5px;
+    background: #f9f4ed91;
+    text-transform: none;
+    font-weight: bold;
+  }
+
+  .full-width {
+    width: 92%;
+    margin-left: 4%;
+}
+    
+.item-native{
+    margin-top: 1%;
+    margin-bottom: 5%;
+    width: 380px;
+}
+
+
+  

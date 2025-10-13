@@ -1,0 +1,29 @@
+
+@if (producto) {
+  <ion-card class="m-0 p-1 none">
+    <ion-item detail="false" class="none">
+      <ion-label class="text-center">
+        <strong>Editar stock</strong>
+      </ion-label>
+    </ion-item>
+    <ion-item class="none">
+      <ion-label position="floating"> <strong>Stock:</strong></ion-label>
+      <ion-input class="text-center" type="number" [(ngModel)]="stock"></ion-input>
+    </ion-item>
+    <ion-grid class="none">
+      <ion-row class="ion-justify-content-end">
+          <ion-col size="auto">
+               <ion-button class="normal" color="dark" (click)="cancelar()">
+                  cancelar
+               </ion-button>
+          </ion-col>
+          <ion-col size="auto">
+               <ion-button fill="clear"
+               class="normal boton-primario" (click)="saveStock()">
+               ok
+               </ion-button>
+       </ion-col>
+      </ion-row>
+  </ion-grid>
+  </ion-card>
+}

@@ -1,0 +1,67 @@
+
+  <div class="row justify-content-center align-items-center" style="height: 100%;">
+    <div class="col-sm-4">
+      <form [formGroup]="userForm" (ngSubmit)=ingresar()>
+        <ion-card class="m-0 card">
+          <ion-item detail="false" lines="none" class="none item-native">
+            <ion-label class="text-center">
+              <img src="/assets/img/logo carrito.png" alt="fondo login">
+            </ion-label>
+          </ion-item>
+
+          <mat-form-field class="normal" appearance="outline" class="full-width" color="primary">
+            <mat-label>Usuario</mat-label>
+            <input matInput class="normal"
+                   formControlName="email"
+                   autocomplete="off"
+                   type="text">
+                   @if (campoNoValido('email')) {
+                     <mat-error class="normal">
+                                El usuario<strong>es requerido</strong>
+                     </mat-error>
+                   }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width password">
+            <mat-label>Contrasena:</mat-label>
+            <input matInput class="normal"
+                   formControlName="contrasena"
+                   autocomplete="off"
+                   [type]=" passwordVisible ? 'text' : 'password'"
+                   (keydown.enter) = "ingresar()">
+                   @if (passwordVisible) {
+                     <mat-icon (click)="passwordVisible = !passwordVisible" matSuffix>visibility_off</mat-icon>
+                    } @else {
+                    <mat-icon (click)="passwordVisible = !passwordVisible" matSuffix>visibility</mat-icon>
+                   }
+
+                   @if (campoNoValido('contrasena')) {
+                     <mat-error class="normal">
+                       La contraseña <strong>es requerida</strong>
+                      </mat-error>
+                    }
+                  </mat-form-field>
+
+          <ion-grid class="grid">
+            <ion-row class="ion-justify-content-end">
+
+                <ion-col size="12">
+                     <ion-button fill="clear" expand="full" (click)="ingresar()"
+                     class="normal boton-primario">
+                     Iniciar Sesión
+                     </ion-button>
+
+
+                </ion-col>
+
+            </ion-row>
+          </ion-grid>
+        </ion-card>
+      </form>
+    </div>
+  </div>
+
+
+
+
+
