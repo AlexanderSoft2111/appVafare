@@ -3,7 +3,11 @@
     <ion-title>
       <strong>Venta #{{ venta.numero }}</strong>
     </ion-title>
+
     <ion-buttons slot="end">
+      <!-- ⬇️ Botón Reimprimir -->
+
+
       <ion-button (click)="closeModal()">
         <ion-icon name="close"></ion-icon>
       </ion-button>
@@ -86,6 +90,12 @@
         <p><strong>Subtotal:</strong> ${{venta.subtotal_sin_iva.toFixed(2) }}</p>
         <p><strong>IVA:</strong> ${{ venta.iva.toFixed(2) }}</p>
         <p class="total"><strong>Total:</strong> ${{ venta.total.toFixed(2) }}</p>
+        <ion-buttons>
+          <ion-chip color="dark" (click)="reimprimir()" [disabled]="isPrinting" >
+            <ion-label>Imprimir</ion-label>
+            <ion-icon name="print-outline"></ion-icon>
+          </ion-chip>
+        </ion-buttons>
       </div>
     </div>
   }

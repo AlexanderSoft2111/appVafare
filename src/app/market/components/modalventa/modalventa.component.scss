@@ -1,7 +1,13 @@
+/* modalventa.component.scss */
 ion-toolbar {
   --background: #f9fafb;
   --color: #111827;
   border-bottom: 1px solid #e5e7eb;
+}
+
+.btn-reprint {
+  --border-radius: 10px;
+  font-weight: 700;
 }
 
 .seccion {
@@ -21,10 +27,7 @@ ion-toolbar {
   color: var(--ion-color-primary);
 }
 
-.col {
-  flex: 1;
-  min-width: 250px;
-}
+.col { flex: 1; min-width: 250px; }
 
 .precio-final {
   font-size: 1.5rem;
@@ -37,10 +40,7 @@ ion-toolbar {
   margin-top: 8px;
 }
 
-.tabla {
-  width: 100%;
-  margin-top: 12px;
-}
+.tabla { width: 100%; margin-top: 12px; }
 
 th.mat-header-cell {
   background: #f1f5f9;
@@ -48,23 +48,21 @@ th.mat-header-cell {
   font-weight: 700;
 }
 
-td.mat-cell {
-  padding: 8px;
-  font-size: 0.9rem;
-  color: #111827;
+td.mat-cell { padding: 8px; font-size: .9rem; color: #111827; }
+
+.totales { text-align: right; margin-left: auto; }
+.totales p { margin: 4px 0; }
+.totales .total { font-size: 1.2rem; font-weight: 800; color: var(--ion-color-success); }
+
+/* ⬇ hace que ion-buttons ocupe TODO el ancho */
+.totales ion-buttons{
+  align-self: stretch;   /* o width:100% */
+  width: 100%;
+  justify-content: flex-end; /* y su contenido a la derecha */
+  --padding-start: 0;    /* quita padding interno de Ionic */
+  --padding-end: 0;
+  margin: 0;
 }
 
-.totales {
-  text-align: right;
-  margin-left: auto;
-}
-
-.totales p {
-  margin: 4px 0;
-}
-
-.totales .total {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--ion-color-success);
-}
+/* opcional: que el chip no meta márgenes extra */
+.totales ion-chip{ margin: 0;  }

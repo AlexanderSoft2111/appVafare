@@ -94,7 +94,6 @@ export default class VentasComponent implements OnInit {
 
 
   async openModalVenta(venta: Venta) {
-    venta!.productos = venta!.productos.slice(0, -1);
     const modalVenta = await this.modalCtrl.create({
       component: ModalventaComponent,
       backdropDismiss: true,

@@ -49,8 +49,9 @@ import {
 } from 'ionicons/icons';
 
 import { PopAddProductoComponent } from '../../components/pop-add-producto/pop-add-producto.component';
-
-import { PrinterService } from 'src/app/services/printer.service';
+import { EpsonPrinterService } from 'src/app/core/printer/epson-printer.service';
+import { PAPER_WIDTH_CHARS } from '../../../core/printer/epson.config';
+import { PrintSale } from '../../../core/printer/print.types';
 
 
 
@@ -94,17 +95,18 @@ export interface User {
 
 export default class VentaComponent implements OnInit, OnDestroy {
   private ventaService = inject(VentaService);
-  private printer = inject(PrinterService);
+  //private printer = inject(PrinterService);
   private firestoreService = inject(FirestoreService);
   private interaccionService = inject(InteraccionService);
   private popoverController = inject(PopoverController);
+  private printer = inject(EpsonPrinterService); 
 
-  private ngZone = inject(NgZone);
 
   venta?: Venta;
   suscriberVenta: Subscription;
   vuelto: number = 0;
   pago: number = 0;
+  sale?: PrintSale
 
   codigoTimer: any;    // para manejar el debounce manual
   //codigoTimers: { [index: number]: any } = {}; // Un timer por input
@@ -421,14 +423,43 @@ eliminarProducto(index: number) {
 
 async saveVenta() {
   if (!this.esVentaValida()) return;
-
   const respuesta = await this.interaccionService.preguntaAlert(
     'Alerta',
     '¿Terminar y guardar la venta actual?'
   );
+  if (respuesta && this.venta) {
 
-  if (respuesta) {
-    await this.ventaService.saveVentaTerminada(); // ⏳ Esperar a que guarde
+    this.venta!.productos = this.venta!.productos.slice(0, -1);
+    this.sale = {
+      numero: this.venta.numero,
+      fecha: this.venta.fecha ?? new Date(),
+      cliente: {
+        nombre: this.venta.cliente?.nombre,
+        ruc: this.venta.cliente?.ruc,
+        telefono: this.venta.cliente?.telefono,
+      },
+      items: (this.venta.productos || []).map((it:any) => ({
+        cantidad: it.cantidad,
+        totalLinea: it.precio,
+        producto: { nombre: it.producto?.nombre, pvp: it.producto?.pvp, check_iva: it.producto?.check_iva }
+      })),
+      subtotalSinIVA: this.venta.subtotal_sin_iva,
+      iva: this.venta.iva,
+      total: this.venta.total,
+      pago: this.pago,
+      vuelto: this.vuelto,
+    };
+  
+    await this.ventaService.saveVentaTerminada(); // Esperar a que guarde
+      // Antes de imprimir (elige 80mm o 58mm):
+    this.printer.setSettings({ widthChars: PAPER_WIDTH_CHARS.W58 }); // ó W80    
+      try {
+        await this.printer.printSale(this.sale!);
+        this.interaccionService.showToast('Ticket impreso');
+      } catch (e:any) {
+        console.error(e);
+        this.interaccionService.showToast('No se pudo imprimir');
+      }
 
     this.pago = 0;
     this.vuelto = 0;
@@ -456,21 +487,5 @@ async saveVenta() {
 
     return true;
   }
-
-
-
-async imprimir() {
-  const venta = {
-    numero: '000123',
-    fecha: new Date(),
-    cliente: { nombre: 'Juan Pérez', ruc: '0102030405', telefono: '0999999999' },
-    productos: [
-      { cantidad: 2, producto: { nombre: 'Camiseta', pvp: 15 } },
-      { cantidad: 1, producto: { nombre: 'Gorra', pvp: 10 }, descLineaPct: 10 },
-    ],
-    subtotal_sin_iva: 40, iva: 4.8, total: 44.8, pago: 50, vuelto: 5.2
-  };
-  await this.printer.printVenta(venta);
-}
 
 }
