@@ -1,0 +1,127 @@
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>Importar inventario inicial</ion-card-title>
+    <ion-card-subtitle>
+      Columnas:
+      <code>codigo, nombre, descripcion, costo_compra, check_iva, costo_sin_iva, pvp, stock, fecha_caducidad, stock_minimo</code>
+      <br />
+      <small>check_iva: SI/NO &nbsp;|&nbsp; fecha: dd/MM/yyyy o serial Excel</small>
+    </ion-card-subtitle>
+  </ion-card-header>
+
+  <ion-card-content>
+
+    <!-- Drag & Drop + input de archivo -->
+    <div
+      class="dropzone"
+      (drop)="onDrop($event)"
+      (dragover)="onDragOver($event)"
+      tabindex="0"
+      aria-label="Arrastra y suelta un archivo de Excel"
+    >
+      <ion-icon name="cloud-upload-outline" aria-hidden="true"></ion-icon>
+
+      <div class="dz-title">Arrastra tu archivo aquí</div>
+      <div class="dz-or">o</div>
+
+      <div class="file-input">
+        <input type="file" accept=".xlsx,.xls" (change)="onFileInput($event)" id="fileExcel" />
+        <label for="fileExcel" class="ion-activatable ripple">Elegir archivo</label>
+        <ion-ripple-effect></ion-ripple-effect>
+      </div>
+
+      @if (fileName) {
+        <div class="file-name">
+          Archivo: <strong>{{ fileName }}</strong>
+        </div>
+      }
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions">
+      <ion-button [disabled]="!productos.length || loading" (click)="guardar()">
+        <ion-icon slot="start" name="save-outline"></ion-icon>
+        {{ loading ? 'Guardando...' : 'Guardar en Firebase' }}
+      </ion-button>
+
+      <div class="chips">
+        @if (productos.length) {
+          <ion-chip>
+            <ion-icon name="document-text-outline"></ion-icon>
+            <ion-label>{{ productos.length | number }} filas listas</ion-label>
+          </ion-chip>
+        }
+
+        @if (rowsPreview.length) {
+          <ion-chip>
+            <ion-icon name="eye-outline"></ion-icon>
+            <ion-label>Vista previa: {{ rowsPreview.length }}</ion-label>
+          </ion-chip>
+        }
+
+      </div>
+    </div>
+
+    <!-- Progreso -->
+     @if (loading) {
+       <div class="progress">
+         <ion-progress-bar [value]="progress"></ion-progress-bar>
+         <div class="progress-label">{{ (progress * 100) | number:'1.0-0' }}%</div>
+       </div>
+     }
+
+    <!-- Errores -->
+     @if (errors.length) {
+       <ion-list class="errors" lines="none">
+        @for (err of errors; track $index) {
+          <ion-item color="danger" *ngFor="let err of errors">
+            <ion-icon slot="start" name="alert-circle-outline"></ion-icon>
+            <ion-label>{{ err }}</ion-label>
+          </ion-item>
+        }
+       </ion-list>
+     }
+
+    <!-- Vista previa (primeras filas sin normalizar) -->
+     @if (rowsPreview.length) {
+       <div class="preview">
+         <div class="table-wrapper">
+           <table class="preview-table ion-text-wrap">
+             <thead>
+               <tr>
+                @for (col of (rowsPreview[0] | keyvalue); track $index) {
+                  <th>{{ col.key }}</th>
+                }
+               </tr>
+             </thead>
+             <tbody>
+              @for (r of rowsPreview; track $index) {
+                <tr>
+                  @for (v of (r | keyvalue); track $index) {
+                    <td >{{ v.value }}</td>
+                  }
+                </tr>
+              }
+             </tbody>
+           </table>
+         </div>
+         <div class="preview-hint">
+           Mostrando solo las primeras {{ rowsPreview.length }} filas (sin normalizar).
+         </div>
+       </div>
+     }
+
+    <!-- Tips (div normal para evitar más imports) -->
+    <div class="tips">
+      <ul>
+        <li>En Excel, deja <strong>codigo</strong> como texto para no perder dígitos.</li>
+        <li>Si falta un costo:
+          <strong>con IVA</strong> → se calcula el que falte;
+          <strong>sin IVA</strong> → ambos quedan iguales.
+        </li>
+        <li>Puedes reimportar: usamos <strong>merge</strong> y <strong>codigo</strong> como ID.</li>
+      </ul>
+    </div>
+
+  </ion-card-content>
+</ion-card>

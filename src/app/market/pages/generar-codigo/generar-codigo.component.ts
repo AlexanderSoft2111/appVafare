@@ -1,208 +1,234 @@
-import { Component, OnInit} from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators, UntypedFormGroup } from '@angular/forms';
-import {
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonTitle,
-  IonContent,
-  IonGrid,
-  IonRow,
-  IonCol,
-  IonIcon,
-  IonItem,
-  IonLabel,
-  IonButton,
-  IonMenuButton
-} from '@ionic/angular/standalone';
+import { Component, inject, OnInit } from '@angular/core';
+import { ReactiveFormsModule,FormBuilder, Validators } from '@angular/forms';
+import { Paths, Producto } from '../../../models/models';
+import { FirestoreService } from '../../../services/firestore.service';
+import { InteraccionService } from '../../../services/interaccion.service';
+import { PrintEtiquetasService } from '../../../services/print-etiquetas.service';
+import { IonHeader, IonToolbar, IonTitle, IonGrid, IonRow, IonCol, IonCard, IonCardContent, IonCardTitle, IonCardHeader, IonContent } from "@ionic/angular/standalone";
 
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatCardModule} from '@angular/material/card';
-import {MatSelectModule} from '@angular/material/select';
-import { MatInputModule }       from '@angular/material/input';
-
-import { addIcons } from 'ionicons';
-import { barcode, saveOutline, saveSharp } from 'ionicons/icons';
-
-import { NgxBarcode6Module } from 'ngx-barcode6';
-import { jsPDF } from 'jspdf';
-import 'svg2pdf.js';
-
+// Angular Material
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule }      from '@angular/material/input';
+import { MatSelectModule }     from '@angular/material/select';
+import { MatRadioModule }      from '@angular/material/radio';
+import { MatCheckboxModule }   from '@angular/material/checkbox';
+import { MatButtonModule }     from '@angular/material/button';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { PreviewEtiquetaComponent } from '../../components/preview-etiqueta-component/preview-etiqueta.component';
 
 @Component({
   selector: 'app-generar-codigo',
   templateUrl: './generar-codigo.component.html',
   styleUrls: ['./generar-codigo.component.scss'],
   imports: [
-    IonButton,
-    IonLabel,
-    IonItem,
-    IonIcon,
-    IonCol,
-    IonRow,
-    IonGrid,
-    IonContent,
-    IonTitle,
-    IonButtons,
-    IonToolbar,
-    IonHeader,
-    IonMenuButton,
+    IonContent, IonHeader, IonToolbar,IonCardHeader, IonCardTitle, IonCardContent, IonCard, IonCol, IonRow, IonGrid, IonTitle, ReactiveFormsModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatCardModule,
-    MatSelectModule,
-    MatInputModule,
-    NgxBarcode6Module
-]
+    MatFormFieldModule, MatInputModule, MatSelectModule, MatRadioModule,
+    MatCheckboxModule, MatButtonModule, MatSlideToggleModule,PreviewEtiquetaComponent
+  ]
 })
 export default class GenerarCodigoComponent implements OnInit {
+  private fb = inject(FormBuilder);
+  private firestore = inject(FirestoreService);
+  private ui = inject(InteraccionService);
+  private printer = inject(PrintEtiquetasService);
 
-  articuloForm:UntypedFormGroup = this.fb.group({
-    codigo: ['', Validators.required],
+  // generar-codigo.component.ts
+  modo: 'nuevo' | 'existente' = 'nuevo';
+
+      // Opciones de vista previa (si quieres tunear desde aquí)
+    px = {
+      barWidthPx: 1.6,
+      barHeightPx: 80,
+      format: 'CODE128' as 'CODE128' | 'EAN13',
+    };
+
+    // Si en tu form ya tienes sizeW/sizeH en mm, úsalo; si no, defaults:
+  defaultSize = { w: 50, h: 30 };
+
+
+  isSaving = false;
+  mensaje = '';
+  productoExistente: Producto | null = null;
+
+  form = this.fb.group({
+    // Búsqueda
+    buscar: [''],
+
+    // Datos mínimos del producto
+    codigo: ['', [Validators.required, Validators.maxLength(13)]],
+    nombre: ['', Validators.required],
+    descripcion: [''],
+    pvp: [null as number | null, [Validators.min(0)]],
+    costo_compra: [null as number | null, [Validators.min(0)]],
+    stock: [null as number | null, [Validators.min(0)]],
+    fecha_caducidad: [''],
+    categoria: [''],
+    check_iva: [false],
+    costo_sin_iva: [0],
+    stock_minimo: [0],
+
+    // Parámetros de etiqueta
+    sizeW: [50, [Validators.required, Validators.min(10)]],
+    sizeH: [30, [Validators.required, Validators.min(10)]],
+    tipoCodigo: ['CODE128' as 'CODE128'|'EAN13'|'QR'],
+    cantidad: [1, [Validators.required, Validators.min(1)]],
+    qrUrl: [''],
+    darkness: [15],
+    speed: [3],
+
+    // Lógica
+    crearInventario: [true]
   });
 
-  campoinValido = false;
-
-  codigo = '';
-  titulo = 'Nuevo Código';
-  descripcion = 'Generar nuevo código';
-  ocultar = false;
-  elementType: "canvas" | "img" | "svg" = 'svg';
-  value = '';
-  format: "" | "CODE128" | "CODE128A" | "CODE128B" | "CODE128C" | "EAN" | "UPC" | "EAN8" | "EAN5" | "EAN2" | "CODE39" | "ITF14" | "MSI" | "MSI10" | "MSI11" | "MSI1010" | "MSI1110" | "pharmacode" | "codabar" = 'CODE128';
-  lineColor = '#000000';
-  width = 2;
-  height = 100;
-  displayValue = true;
-  fontOptions = '';
-  font = 'monospace';
-  textAlign = 'center';
-  textPosition = 'bottom';
-  textMargin = 2;
-  fontSize = 20;
-  background = '#ffffff';
-  margin = 10;
-  marginTop = 10;
-  marginBottom = 10;
-  marginLeft = 10;
-  marginRight = 10;
-  numeroImpresion = 0;
-
-  get values(): string[] {
-    return this.value.split('\n')
+    ngOnInit() {
+    this.actualizarEstadoCrearInventario();
   }
 
-  codeList: string[] = [
-    '', 'CODE128',
-    'CODE128A', 'CODE128B', 'CODE128C',
-    'UPC', 'EAN8', 'EAN5', 'EAN2',
-    'CODE39',
-    'ITF14',
-    'MSI', 'MSI10', 'MSI11', 'MSI1010', 'MSI1110',
-    'pharmacode',
-    'codabar'
-  ];
-
-  selectedValue?: string;
-
-  numeros = [
-    {value: 3, viewValue: '3'},
-    {value: 6, viewValue: '6'},
-    {value: 9, viewValue: '9'},
-    {value: 12, viewValue: '12'},
-    {value: 15, viewValue: '15'},
-    {value: 18, viewValue: '18'},
-    {value: 21, viewValue: '21'},
-  ];
-
-
-  constructor(private fb:FormBuilder) {
-    addIcons({ barcode, 'save-outline': saveOutline, 'save-sharp': saveSharp });
-   }
-
-  ngOnInit() {
-
+  setModo(m: 'nuevo'|'existente') {
+    this.modo = m;
+    this.actualizarEstadoCrearInventario();
   }
 
-  posicion(pos: number){
-      this.numeroImpresion = pos;
-      this.campoinValido = false;
-  }
-
-  valuechangeInput(){
-    this.value = this.articuloForm.controls['codigo'].value ?? '';
-  }
-
-  campoNoValido(campo: string){
-    return  this.articuloForm.controls[campo].errors &&
-      this.articuloForm.controls[campo].touched;
+  private actualizarEstadoCrearInventario() {
+    const ctrl = this.form.get('crearInventario');
+    if (!ctrl) return;
+    if (this.modo === 'nuevo') ctrl.enable({ emitEvent: false });
+    else ctrl.disable({ emitEvent: false });
   }
 
 
-async generarPdfSvg() {
-  // Validaciones del form y de numeroImpresion
-  if (this.articuloForm.invalid) {
-    this.articuloForm.markAllAsTouched();
-    return;
-  }
-  if (this.numeroImpresion <= 0) {
-    this.campoinValido = true;
-    return;
-  }
-
-  // 1) Localiza el SVG del código de barras ya renderizado en el DOM
-  //    (asegúrate de que el template tenga <div id="contenido"><ngx-barcode6 .../></div>)
-  const svg = document.querySelector<SVGSVGElement>('#contenido svg');
-  if (!svg) {
-    console.error('No se encontró el SVG dentro de #contenido');
-    return;
-  }
-
-  // 2) Crea el PDF y pinta tu cabecera
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  doc.setFontSize(30);
-  doc.setTextColor(126, 0, 46);
-  doc.text('Minimercado AppMarket', 50, 12);
-
-  // 3) Posiciones predefinidas (idénticas a tu switch antiguo)
-  //    3 columnas por fila: x = 10, 75, 140; y empieza en 20 y va bajando
-  const columnsX = [10, 75, 140];
-  const rowStartY = 20;
-  const rowStep = 40; // distancia vertical entre filas (20->60->100->...)
-  const width = 60;
-  const height = 30;
-
-  // función utilitaria: genera las posiciones (x, y) necesarias
-  const getPositions = (count: number): Array<{ x: number; y: number }> => {
-    const coords: Array<{ x: number; y: number }> = [];
-    let placed = 0;
-    let row = 0;
-    while (placed < count) {
-      for (let col = 0; col < columnsX.length && placed < count; col++) {
-        coords.push({ x: columnsX[col], y: rowStartY + rowStep * row });
-        placed++;
-      }
-      row++;
+  // --------- Búsqueda / validación ----------
+  async validarCodigoUnico() {
+    if (this.modo !== 'nuevo') return;
+    const codigo = (this.form.value.codigo || '').trim();
+    if (!codigo) return;
+    const p = await this.firestore.getDocumentQuery<Producto>(Paths.productos, 'codigo', codigo);
+    if (p) {
+      this.form.get('codigo')?.setErrors({ codigoDuplicado: true });
+      this.ui.showToast('Ya existe un producto con este código');
+    } else {
+      this.form.get('codigo')?.setErrors(null);
     }
-    return coords;
-  };
+  }
 
-  const positions = getPositions(this.numeroImpresion);
+  async buscarProductoExistente() {
+    const q = (this.form.value.buscar || '').trim();
+    if (!q) return;
+    const p = await this.firestore.getDocumentQuery<Producto>(Paths.productos, 'codigo', q);
+    if (p) {
+      this.productoExistente = p;
+      this.form.patchValue({
+        codigo: p.codigo,
+        nombre: p.nombre,
+        descripcion: p.descripcion || '',
+        pvp: p.pvp ?? null
+      });
+      this.ui.showToast('Producto cargado');
+    } else {
+      this.productoExistente = null;
+      this.ui.showToast('No se encontró el producto');
+    }
+  }
 
-  // 4) Pegar el MISMO SVG en todas las posiciones (vectorial y nítido)
-  for (const { x, y } of positions) {
-    // @ts-ignore – si no agregaste tipos, doc.svg existe por el plugin
-    await (doc as any).svg(svg, {
-      x, y,
-      width, height, // tamaño del bloque del barcode en el PDF
-      // optional:
-      // preserveAspectRatio: 'xMidYMid meet'
+  // --------- ZPL ----------
+  private buildZpl(): string {
+    const f = this.form.value;
+    return this.printer.buildZplLabel({
+      widthMm: f.sizeW!, heightMm: f.sizeH!,
+      product: f.nombre || '',
+      sku: f.codigo || '',
+      price: f.pvp ?? undefined,
+      barcodeType: f.tipoCodigo!,
+      barcodeValue: f.codigo || '',
+      qrUrl: f.qrUrl || '',
+      darkness: f.darkness ?? undefined,
+      speed: f.speed ?? undefined
     });
   }
 
-  // 5) Limpieza / guardar
-  this.articuloForm.reset();
-  this.value = '';
-  doc.save('codigos.pdf');
-}
+  vistaPreviaZpl(): string {
+    return this.buildZpl();
+  }
+
+  // --------- Impresión ----------
+  private async imprimir() {
+    const zpl = this.buildZpl();
+    await this.printer.printZpl(zpl, { copies: this.form.value.cantidad || 1 });
+  }
+
+  // --------- Acciones ----------
+  async soloImprimir() {
+    this.mensaje = '';
+    try {
+      if (this.modo === 'existente' && !this.productoExistente) {
+        await this.buscarProductoExistente();
+        if (!this.productoExistente) return;
+      }
+      await this.imprimir();
+      this.ui.showToast('Impresión enviada');
+    } catch (e: any) {
+      this.mensaje = 'Error al imprimir: ' + (e?.message || e);
+      this.ui.showToast(this.mensaje);
+    }
+  }
+
+  async guardarEImprimir() {
+    if (this.modo === 'nuevo') {
+      if (this.form.invalid) {
+        this.form.markAllAsTouched();
+        this.ui.showToast('Completa los datos requeridos');
+        return;
+      }
+      if (this.form.get('codigo')?.hasError('codigoDuplicado')) {
+        this.ui.showToast('El código ya existe');
+        return;
+      }
+    }
+
+    this.isSaving = true;
+    this.mensaje = '';
+    try {
+      // 1) Guardar nuevo en Inventario si corresponde
+      if (this.modo === 'nuevo' && this.form.value.crearInventario) {
+        const data: Producto = {
+          codigo: this.form.value.codigo!,
+          nombre: this.form.value.nombre!,
+          descripcion: this.form.value.descripcion || '',
+          pvp: this.form.value.pvp ?? null as any,
+          costo_compra: this.form.value.costo_compra ?? null as any,
+          stock: this.form.value.stock ?? null as any,
+          fecha_caducidad: this.form.value.fecha_caducidad || null as any,
+          check_iva: this.form.value.check_iva  || false,
+          costo_sin_iva: this.form.value.costo_sin_iva || 0 ,
+          stock_minimo: this.form.value.stock_minimo  || 0,
+          // agrega más campos si tu modelo los necesita
+        };
+        // Usa tu servicio existente (elige la API que prefieras)
+        const { docPath, write } = await this.firestore.upsertOne<Producto>(
+          Paths.productos,
+          data,
+          { idField: 'codigo', useAutoId: false, merge: true }
+        );
+        this.ui.showToast(this.firestore.isOffline() ? 'Guardado (pendiente de sincronizar)' : 'Guardado con éxito');
+
+        // Notificación cuando sincronice (opcional)
+        this.firestore.observeSyncStatus(docPath).subscribe(st => {
+          if (st === 'synced') this.ui.showToast('Sincronizado');
+        });
+
+        // Manejo de error real al sincronizar
+        write.catch(err => this.ui.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido')));
+      }
+
+      // 2) Imprimir
+      await this.imprimir();
+      this.ui.showToast('Producto guardado e impresión enviada');
+    } catch (e: any) {
+      this.mensaje = 'Error: ' + (e?.message || e);
+      this.ui.showToast(this.mensaje);
+    } finally {
+      this.isSaving = false;
+    }
+  }
 }

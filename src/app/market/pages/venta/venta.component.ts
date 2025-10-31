@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, signal,NgZone   } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal, NgZone } from '@angular/core';
 
 
 import { Cliente, Venta, Producto, Paths, ProductoVenta } from '../../../models/models';
@@ -6,10 +6,10 @@ import { Observable, Subscription, combineLatest } from 'rxjs';
 import { startWith, debounceTime, map } from 'rxjs/operators';
 
 
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
-import {MatInputModule} from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatIconModule} from '@angular/material/icon';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { VentaService } from 'src/app/services/venta.service';
@@ -60,35 +60,35 @@ export interface User {
 }
 
 @Component({
-    selector: 'app-venta',
-    templateUrl: './venta.component.html',
-    styleUrls: ['./venta.component.scss'],
-    imports: [
-      IonLabel,
-      IonItem,
-      IonContent,
-      IonButton,
-      IonIcon,
-      IonTitle,
-      IonButtons,
-      IonRow,
-      IonToolbar,
-      IonGrid,
-      IonHeader,
-      IonMenuButton,
-      IonCol,
-      IonInput,
-      IonFooter,
-      DatePipe,
-      AsyncPipe,
-      RouterLink,
-      FormsModule,
-      MatFormFieldModule,
-      MatInputModule,
-      MatAutocompleteModule,
-      ReactiveFormsModule,
-      MatIconModule
-    ]
+  selector: 'app-venta',
+  templateUrl: './venta.component.html',
+  styleUrls: ['./venta.component.scss'],
+  imports: [
+    IonLabel,
+    IonItem,
+    IonContent,
+    IonButton,
+    IonIcon,
+    IonTitle,
+    IonButtons,
+    IonRow,
+    IonToolbar,
+    IonGrid,
+    IonHeader,
+    IonMenuButton,
+    IonCol,
+    IonInput,
+    IonFooter,
+    DatePipe,
+    AsyncPipe,
+    RouterLink,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule,
+    MatIconModule
+  ]
 })
 
 
@@ -99,7 +99,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
   private firestoreService = inject(FirestoreService);
   private interaccionService = inject(InteraccionService);
   private popoverController = inject(PopoverController);
-  private printer = inject(EpsonPrinterService); 
+  private printer = inject(EpsonPrinterService);
 
 
   venta?: Venta;
@@ -112,12 +112,12 @@ export default class VentaComponent implements OnInit, OnDestroy {
   //codigoTimers: { [index: number]: any } = {}; // Un timer por input
   private relojInterval!: any;
 
-// Timers por input (fila)
-codigoTimers: { [index: number]: any } = {};
-// Suprime keyups inmediatamente después de un Enter (scanner)
-suppressUntil: Record<number, number> = {};
-// Evita re-entradas simultáneas por fila
-inFlightByIndex: Record<number, boolean> = {};
+  // Timers por input (fila)
+  codigoTimers: { [index: number]: any } = {};
+  // Suprime keyups inmediatamente después de un Enter (scanner)
+  suppressUntil: Record<number, number> = {};
+  // Evita re-entradas simultáneas por fila
+  inFlightByIndex: Record<number, boolean> = {};
 
   encabezados = ['Código', 'Nombre', 'Stock', 'Cantidad', 'Precio', 'SubTotal']
   clienteControl = new FormControl<string | Cliente>('');
@@ -128,20 +128,21 @@ inFlightByIndex: Record<number, boolean> = {};
 
   constructor() {
 
-        addIcons({save, closeCircle,create,addCircle,search,remove,add,trash });
-        this.venta = this.ventaService.getVenta();
-        this.suscriberVenta = this.ventaService.getVentaChanges().subscribe( res => {
-              this.venta = res;
-              this.addProducto();
-              this.calcularValores();
-              this.changePago();
-        });
-        this.addProducto();
-        this.calcularValores();
+    addIcons({ save, closeCircle, create, addCircle, search, remove, add, trash });
+    this.venta = this.ventaService.getVenta();
+    this.suscriberVenta = this.ventaService.getVentaChanges().subscribe(res => {
+      this.venta = res;
+      this.addProducto();
+      this.calcularValores();
+      this.changePago();
+    });
+    this.addProducto();
+    this.calcularValores();
   }
 
 
   ngOnInit() {
+
     // 1. Obtener todos los clientes en tiempo real (funciona offline)
     this.clientes$ = this.firestoreService.getCollectionChanges<Cliente>(Paths.clientes, 'nombre');
 
@@ -159,7 +160,7 @@ inFlightByIndex: Record<number, boolean> = {};
         const texto = typeof input === 'string' ? input.toLowerCase() : input?.nombre?.toLowerCase() || '';
         return clientes.filter(cliente =>
           cliente.nombre.toLowerCase().includes(texto) ||
-          cliente.ruc?.toLowerCase().includes(texto)
+          cliente.ruc?.toLowerCase().includes('0999999999999')
         );
       })
     );
@@ -167,13 +168,13 @@ inFlightByIndex: Record<number, boolean> = {};
 
 
   iniciarRelojVenta() {
-  this.relojInterval = setInterval(() => {
-    if (this.venta) {
-      this.venta.fecha = new Date();
-    }
-  }, 1000);
+    this.relojInterval = setInterval(() => {
+      if (this.venta) {
+        this.venta.fecha = new Date();
+      }
+    }, 1000);
 
-}
+  }
 
 
   displayFn(cliente: Cliente): string {
@@ -183,8 +184,8 @@ inFlightByIndex: Record<number, boolean> = {};
   seleccionarCliente(cliente: Cliente) {
     this.clienteSeleccionado = cliente;
     // Aquí puedes llenar los campos visuales, o vincularlo a la venta
-      this.venta!.cliente = cliente;
-       this.ventaService.saveVenta();
+    this.venta!.cliente = cliente;
+    this.ventaService.saveVenta();
   }
 
   ngOnDestroy() {
@@ -192,8 +193,8 @@ inFlightByIndex: Record<number, boolean> = {};
       this.suscriberVenta.unsubscribe();
     }
     if (this.relojInterval) {
-    clearInterval(this.relojInterval);
-  }
+      clearInterval(this.relojInterval);
+    }
   }
 
 
@@ -202,26 +203,26 @@ inFlightByIndex: Record<number, boolean> = {};
       const productoVenta = {
         cantidad: 1,
         producto: {
-            nombre: '',
-            descripcion: '',
-            costo_compra: 0,
-            check_iva: false,
-            costo_sin_iva: 0,
-            pvp: 0,
-            codigo: '',
-            stock: 0,
-            fecha_caducidad: new Date(),
-            stock_minimo: 0,
-            diferencia: 0
+          nombre: '',
+          descripcion: '',
+          costo_compra: 0,
+          check_iva: false,
+          costo_sin_iva: 0,
+          pvp: 0,
+          codigo: '',
+          stock: 0,
+          fecha_caducidad: '',
+          stock_minimo: 0,
+          diferencia: 0
         },
         precio: 0,
       }
       if (!this.venta.productos.length) {
-          this.venta.productos.push(productoVenta);
+        this.venta.productos.push(productoVenta);
       } else {
-          if (this.venta.productos[this.venta.productos.length - 1].producto.codigo.length) {
-              this.venta.productos.push(productoVenta);
-          }
+        if (this.venta.productos[this.venta.productos.length - 1].producto.codigo.length) {
+          this.venta.productos.push(productoVenta);
+        }
       }
 
     }
@@ -229,152 +230,151 @@ inFlightByIndex: Record<number, boolean> = {};
   }
 
   // Escritura manual: dispara tras 600ms sin teclear
-onKeyupCodigo(index: number) {
-  // Si justo acabamos de procesar un Enter del scanner, ignoramos este keyup
-  if (Date.now() < (this.suppressUntil[index] || 0)) return;
+  onKeyupCodigo(index: number) {
+    // Si justo acabamos de procesar un Enter del scanner, ignoramos este keyup
+    if (Date.now() < (this.suppressUntil[index] || 0)) return;
 
-  clearTimeout(this.codigoTimers[index]);
+    clearTimeout(this.codigoTimers[index]);
 
-  const codigo = this.venta?.productos[index]?.producto?.codigo ?? '';
-  this.codigoTimers[index] = setTimeout(() => {
+    const codigo = this.venta?.productos[index]?.producto?.codigo ?? '';
+    this.codigoTimers[index] = setTimeout(() => {
+      if (codigo && codigo.length > 5) {
+        this.tryBuscarCodigo(codigo, index);
+      }
+    }, 600);
+  }
+
+  // Escáner (Enter): inmediato y cancela debounce de esa fila
+  onEnterCodigo(index: number) {
+    clearTimeout(this.codigoTimers[index]);
+    // Bloquea los keyup que llegan justo después del Enter
+    this.suppressUntil[index] = Date.now() + 700;
+
+    const codigo = this.venta!.productos[index].producto.codigo;
     if (codigo && codigo.length > 5) {
       this.tryBuscarCodigo(codigo, index);
     }
-  }, 600);
-}
-
-// Escáner (Enter): inmediato y cancela debounce de esa fila
-onEnterCodigo(index: number) {
-  clearTimeout(this.codigoTimers[index]);
-  // Bloquea los keyup que llegan justo después del Enter
-  this.suppressUntil[index] = Date.now() + 700;
-
-  const codigo = this.venta!.productos[index].producto.codigo;
-  if (codigo && codigo.length > 5) {
-    this.tryBuscarCodigo(codigo, index);
   }
-}
 
-// Evita llamadas simultáneas; NO bloquea mismo código en lecturas posteriores
-private async tryBuscarCodigo(codigo: string, index: number) {
-  if (this.inFlightByIndex[index]) return;
+  // Evita llamadas simultáneas; NO bloquea mismo código en lecturas posteriores
+  private async tryBuscarCodigo(codigo: string, index: number) {
+    if (this.inFlightByIndex[index]) return;
 
-  this.inFlightByIndex[index] = true;
-  try {
-    await this.buscarProductoPorCodigo(codigo, index);
-    // si en addProductoWithCode limpias el input y agregas una nueva línea,
-    // el siguiente escaneo entrará sin problemas.
-  } finally {
-    this.inFlightByIndex[index] = false;
+    this.inFlightByIndex[index] = true;
+    try {
+      await this.buscarProductoPorCodigo(codigo, index);
+      // si en addProductoWithCode limpias el input y agregas una nueva línea,
+      // el siguiente escaneo entrará sin problemas.
+    } finally {
+      this.inFlightByIndex[index] = false;
+    }
   }
-}
 
-async buscarProductoPorCodigo(codigo: string, index: number) {
-  const res = await this.firestoreService.getDocumentQuery<Producto>(Paths.productos, 'codigo', codigo);
-  if (res) {
-    this.addProductoWithCode(res, index); // tu método ya suma cantidad si existe
-  } else {
-    this.interaccionService.showToast('Producto no encontrado');
+  async buscarProductoPorCodigo(codigo: string, index: number) {
+    const res = await this.firestoreService.getDocumentQuery<Producto>(Paths.productos, 'codigo', codigo);
+    if (res) {
+      this.addProductoWithCode(res, index); // tu método ya suma cantidad si existe
+    } else {
+      this.interaccionService.showToast('Producto no encontrado');
+    }
   }
-}
-
 
   setFocusNewProducto() {
-        setTimeout(() => {
-          const inputs = document.getElementsByClassName("codigo") as any;
+    setTimeout(() => {
+      const inputs = document.getElementsByClassName("codigo") as any;
 
-          if (inputs.length) {
-            inputs[inputs.length -1].setFocus();
-          }
-        }, 500);
+      if (inputs.length) {
+        inputs[inputs.length - 1].setFocus();
+      }
+    }, 500);
   }
 
   clearInput() {
-      this.venta!.productos[this.venta!.productos.length - 1].producto.codigo = '';
-      this.setFocusNewProducto();
+    this.venta!.productos[this.venta!.productos.length - 1].producto.codigo = '';
+    this.setFocusNewProducto();
   }
 
   // Añade un producto a la venta con el codigo escaneado
   // Aumenta la cantidad del producto si al escanear es el mismo producto
   // que ya existe
   addProductoWithCode(newproducto: Producto, index: number) {
-      const productoExist = this.venta!.productos.find( producto => {
-             return  producto.producto.codigo === newproducto.codigo
-      });
+    const productoExist = this.venta!.productos.find(producto => {
+      return producto.producto.codigo === newproducto.codigo
+    });
 
-      if (productoExist!.producto.nombre) {
-        productoExist!.cantidad ++ ;
-        this.clearInput();
-        this.ventaService.saveVenta();
-      } else {
-          this.venta!.productos[index].producto = newproducto;
-          this.ventaService.saveVenta();
-          this.addProducto();
-      }
+    if (productoExist!.producto.nombre) {
+      productoExist!.cantidad++;
+      this.clearInput();
+      this.ventaService.saveVenta();
+    } else {
+      this.venta!.productos[index].producto = newproducto;
+      this.ventaService.saveVenta();
+      this.addProducto();
+    }
   }
 
 
   addCantidad(producto: ProductoVenta) {
-    producto.cantidad ++;
+    producto.cantidad++;
     this.ventaService.saveVenta();
   }
 
 
   removeCantidad(producto: ProductoVenta) {
-  if (!this.venta) return;
+    if (!this.venta) return;
 
-  if (producto.cantidad > 1) {
-    producto.cantidad--;
-  } else {
-    // Eliminar el producto si la cantidad es 1 y le das a "menos"
-    const index = this.venta.productos.indexOf(producto);
-    if (index !== -1) {
-      this.venta.productos.splice(index, 1);
+    if (producto.cantidad > 1) {
+      producto.cantidad--;
+    } else {
+      // Eliminar el producto si la cantidad es 1 y le das a "menos"
+      const index = this.venta.productos.indexOf(producto);
+      if (index !== -1) {
+        this.venta.productos.splice(index, 1);
+      }
     }
+
+    this.ventaService.saveVenta();
   }
 
-  this.ventaService.saveVenta();
-}
+  eliminarProducto(index: number) {
+    if (!this.venta) return;
 
-eliminarProducto(index: number) {
-  if (!this.venta) return;
-
-  this.venta.productos.splice(index, 1);
-  this.ventaService.saveVenta();
-}
+    this.venta.productos.splice(index, 1);
+    this.ventaService.saveVenta();
+  }
 
 
   changeCantidad(producto: ProductoVenta, index: number) {
 
     if (producto.cantidad === 0) {
-        this.eliminarProducto(index);
-          return;
-      }
-      producto.precio = producto.cantidad * producto.producto.pvp;
-      this.ventaService.saveVenta();
+      this.eliminarProducto(index);
+      return;
+    }
+    producto.precio = producto.cantidad * producto.producto.pvp;
+    this.ventaService.saveVenta();
   }
 
-   calcularValores() {
-      if (this.venta) {
-        this.venta.total = 0;
-        this.venta.subtotal_con_iva = 0;
-        this.venta.subtotal_sin_iva = 0;
-        this.venta.iva = 0;
-        this.venta.productos.forEach( item => {
-              item.precio = item.cantidad * item.producto.pvp;
-              this.venta!.subtotal_sin_iva = this.venta!.subtotal_sin_iva + (item.precio / 1.15);
-              if (item.producto.check_iva) {
-                 this.venta!.iva = this.venta!.iva + (item.precio - (item.precio / 1.15));
-                 this.venta!.subtotal_con_iva = this.venta!.subtotal_con_iva + item.precio  + this.venta!.iva;
-              }
-              this.venta!.total = this.venta!.subtotal_sin_iva + this.venta!.iva;
-        });
-      }
+  calcularValores() {
+    if (this.venta) {
+      this.venta.total = 0;
+      this.venta.subtotal_con_iva = 0;
+      this.venta.subtotal_sin_iva = 0;
+      this.venta.iva = 0;
+      this.venta.productos.forEach(item => {
+        item.precio = item.cantidad * item.producto.pvp;
+        this.venta!.subtotal_sin_iva = this.venta!.subtotal_sin_iva + (item.precio / 1.15);
+        if (item.producto.check_iva) {
+          this.venta!.iva = this.venta!.iva + (item.precio - (item.precio / 1.15));
+          this.venta!.subtotal_con_iva = this.venta!.subtotal_con_iva + item.precio + this.venta!.iva;
+        }
+        this.venta!.total = this.venta!.subtotal_sin_iva + this.venta!.iva;
+      });
+    }
   }
 
 
   // AGREGA UN NUEVO PRODUCTO DE VENTA RAPIDAMENTE
-   async addProductoRapido() {
+  async addProductoRapido() {
     const popover = await this.popoverController.create({
       component: PopAddProductoComponent,
       cssClass: 'popoverCss',
@@ -388,12 +388,12 @@ eliminarProducto(index: number) {
       const producto = data as Producto;
 
       const item: ProductoVenta = {
-          cantidad: 1,
-          precio: producto.pvp,
-          producto,
+        cantidad: 1,
+        precio: producto.pvp,
+        producto,
       }
       if (!this.venta!.productos[this.venta!.productos.length - 1].producto.codigo) {
-        this.venta!.productos[this.venta!.productos.length - 1] =  item;
+        this.venta!.productos[this.venta!.productos.length - 1] = item;
       } else {
         this.venta!.productos.push(item);
       }
@@ -401,70 +401,70 @@ eliminarProducto(index: number) {
       this.addProducto();
     }
 
-}
+  }
 
   resetVenta() {
-     this.interaccionService.preguntaAlert('Alerta',
-            '¿Seguro que desea resetear la venta actual?').then( res => {
-                if (res) {
-                  this.ventaService.resetVenta();
-                }
-            })
+    this.interaccionService.preguntaAlert('Alerta',
+      '¿Seguro que desea resetear la venta actual?').then(res => {
+        if (res) {
+          this.ventaService.resetVenta();
+        }
+      })
   }
 
   changePago() {
-      if (this.pago >= this.venta!.total) {
-            this.vuelto = this.pago - this.venta!.total;
-      } else {
-        this.vuelto = 0;
-      }
+    if (this.pago >= this.venta!.total) {
+      this.vuelto = this.pago - this.venta!.total;
+    } else {
+      this.vuelto = 0;
+    }
   }
 
 
-async saveVenta() {
-  if (!this.esVentaValida()) return;
-  const respuesta = await this.interaccionService.preguntaAlert(
-    'Alerta',
-    '¿Terminar y guardar la venta actual?'
-  );
-  if (respuesta && this.venta) {
+  async saveVenta() {
+    if (!this.esVentaValida()) return;
+    const respuesta = await this.interaccionService.preguntaAlert(
+      'Alerta',
+      '¿Terminar y guardar la venta actual?'
+    );
+    if (respuesta && this.venta) {
 
-    this.venta!.productos = this.venta!.productos.slice(0, -1);
-    this.sale = {
-      numero: this.venta.numero,
-      fecha: this.venta.fecha ?? new Date(),
-      cliente: {
-        nombre: this.venta.cliente?.nombre,
-        ruc: this.venta.cliente?.ruc,
-        telefono: this.venta.cliente?.telefono,
-      },
-      items: (this.venta.productos || []).map((it:any) => ({
-        cantidad: it.cantidad,
-        totalLinea: it.precio,
-        producto: { nombre: it.producto?.nombre, pvp: it.producto?.pvp, check_iva: it.producto?.check_iva }
-      })),
-      subtotalSinIVA: this.venta.subtotal_sin_iva,
-      iva: this.venta.iva,
-      total: this.venta.total,
-      pago: this.pago,
-      vuelto: this.vuelto,
-    };
-  
-    await this.ventaService.saveVentaTerminada(); // Esperar a que guarde
+      this.venta!.productos = this.venta!.productos.slice(0, -1);
+      this.sale = {
+        numero: this.venta.numero,
+        fecha: this.venta.fecha ?? new Date(),
+        cliente: {
+          nombre: this.venta.cliente?.nombre,
+          ruc: this.venta.cliente?.ruc,
+          telefono: this.venta.cliente?.telefono,
+        },
+        items: (this.venta.productos || []).map((it: any) => ({
+          cantidad: it.cantidad,
+          totalLinea: it.precio,
+          producto: { nombre: it.producto?.nombre, pvp: it.producto?.pvp, check_iva: it.producto?.check_iva }
+        })),
+        subtotalSinIVA: this.venta.subtotal_sin_iva,
+        iva: this.venta.iva,
+        total: this.venta.total,
+        pago: this.pago,
+        vuelto: this.vuelto,
+      };
+
+      await this.ventaService.saveVentaTerminada(); // Esperar a que guarde
       // Antes de imprimir (elige 80mm o 58mm):
-    this.printer.setSettings({ widthChars: PAPER_WIDTH_CHARS.W58 }); // ó W80    
+      this.printer.setSettings({ widthChars: PAPER_WIDTH_CHARS.W58 }); // ó W80
       try {
         await this.printer.printSale(this.sale!);
         this.interaccionService.showToast('Ticket impreso');
-      } catch (e:any) {
+      } catch (e: any) {
         console.error(e);
         this.interaccionService.showToast('No se pudo imprimir');
       }
 
-    this.pago = 0;
-    this.vuelto = 0;
+      this.pago = 0;
+      this.vuelto = 0;
+    }
   }
-}
 
 
   private esVentaValida(): boolean {

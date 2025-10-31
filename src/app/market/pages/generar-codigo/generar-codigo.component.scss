@@ -1,80 +1,43 @@
-.full-width {
-    width: 100%;
+ion-card { margin-bottom: 16px; }
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
-    
-.row {
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.actions {
   display: flex;
-  flex-direction: row;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
 }
 
-.col {
-  flex: 1;
-  margin-right: 20px;
-  margin-bottom: 8px;
+.zpl-preview {
+  background: #0b1020;
+  color: #b8e1ff;
+  padding: 12px;
+  border-radius: 8px;
+  max-height: 380px;
+  overflow: auto;
+  font-size: 12px;
+  line-height: 1.25;
 }
 
-.col:last-child {
-  margin-right: 0;
-}
+.msg { margin-top: 8px; color: #444; }
+.muted { color: #6b7280; margin-top: 6px; }
+.ml-3 { margin-left: 1rem; }
 
-
-.card-content {
-    background: white;
-    margin: 10px;
-    border-radius: 10px;
-    border: 1px solid #bebfc1;
-}
-
-.button-next {
-    
-    --background: linear-gradient(to right, #e53935 0%, #e35d5b  51%, #e53935  100%);
-    max-width: 200px;
-    margin-bottom: 10px;
-    color: white !important;
-    margin-left: auto;
-    border-radius: 8px; 
-    
-}
-
-.icon-person {
-    font-size: 40px;
-    color: white;
-    background: #4CB8C4;  /* fallback for old browsers */
-    background: -webkit-linear-gradient(to bottom, #3CD3AD, #4CB8C4);  /* Chrome 10-25, Safari 5.1-6 */
-    background: linear-gradient(to bottom, #3CD3AD, #4CB8C4); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-    padding: 15px;
-    border-radius: 50%;
-}
-
-.item-maps {
-    --background: #fff0b6; 
-    border-radius: 15px; 
-    margin: 10px;
-}
-  
-input {
-    border: solid #b0bec5 1px;
-    border-radius: 10px;
-    padding: 10px;
-    margin: -5px 0px 0px -5px;
-}
-
-textarea {
-    border: solid #b0bec5 1px;
-    border-radius: 10px;
-    padding: 10px !important;
-    margin: -5px 0px 0px -5px !important;
-}
-
-ion-menu-button {
-    color: var(--ion-color-primary);
-  }
-
-.red{
-    color: red;
-}  
-
-.black{
-    color: black;
+@media (min-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr 1fr; }
 }

@@ -15,10 +15,10 @@
     orderBy,getDocs,
     setDoc,deleteDoc,
     collection,where,
-    onSnapshot
+    onSnapshot,writeBatch
   } from '@angular/fire/firestore';
 
- import { OptimisticWrite } from '../models/models';
+ import { OptimisticWrite, SaveManyOptions } from '../models/models';
 
 
   type SortDir = 'asc' | 'desc';
@@ -33,6 +33,107 @@
   private env = inject(EnvironmentInjector);
 
   constructor() {}
+
+async upsertMany<T extends Record<string, any>>(
+    path: string,
+    items: T[],
+    options: SaveManyOptions = {}
+  ): Promise<void> {
+    if (!Array.isArray(items) || items.length === 0) return;
+
+    const {
+      idField = 'codigo',
+      useAutoId = true,
+      merge = true,
+      chunkSize = 450,
+      onProgress,
+    } = options;
+
+    const total = items.length;
+    let escritos = 0;
+
+    for (let i = 0; i < total; i += chunkSize) {
+      const slice = items.slice(i, i + chunkSize);
+      const batch = writeBatch(this.db);
+      const colRef = collection(this.db, path);
+
+      for (const raw of slice) {
+        // 1) Obtener la referencia de documento
+        let refId: string;
+        let refDoc;
+
+        if (useAutoId) {
+          // === ID automático, igual que cuando haces doc(collection) ===
+          refDoc = doc(colRef);   // genera ID
+          refId = refDoc.id;
+        } else {
+          // === Usa idField si viene; si no, genera uno ===
+          const fromField = raw[idField];
+          if (fromField !== undefined && fromField !== null && String(fromField).trim() !== '') {
+            refId = String(fromField).trim();
+            refDoc = doc(this.db, `${path}/${refId}`);
+          } else {
+            refDoc = doc(colRef);
+            refId = refDoc.id;
+          }
+        }
+
+        // 2) Construir payload final
+        const hasDate = Object.prototype.hasOwnProperty.call(raw, 'date');
+        const payload = {
+          ...raw,
+          id: refId,                       // guarda el id también como campo
+          date: hasDate ? (raw as any).date : serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        };
+
+        // 3) Upsert
+        batch.set(refDoc, payload, { merge });
+      }
+
+      await batch.commit();
+      escritos += slice.length;
+      onProgress?.(escritos / total);
+    }
+  }
+
+  async upsertOne<T extends Record<string, any>>(
+    path: string,
+    item: T,
+    options: Omit<SaveManyOptions, 'onProgress' | 'chunkSize'> = {}
+  ): Promise<{ id: string; docPath: string; write: Promise<void> }> {
+    const { idField = 'codigo', useAutoId = false, merge = true } = options;
+
+    const colRef = collection(this.db, path);
+    let refId: string;
+    let refDoc;
+
+    if (useAutoId) {
+      refDoc = doc(colRef);
+      refId = refDoc.id;
+    } else {
+      const fromField = item[idField];
+      if (fromField !== undefined && fromField !== null && String(fromField).trim() !== '') {
+        refId = String(fromField).trim();
+        refDoc = doc(this.db, `${path}/${refId}`);
+      } else {
+        refDoc = doc(colRef);
+        refId = refDoc.id;
+      }
+    }
+
+    const payload = {
+      ...item,
+      id: refId,
+      date: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const write = setDoc(refDoc, payload, { merge });
+    return { id: refId, docPath: refDoc.path, write };
+  }
+
+
 
   /** Helper para no repetir y envolver todo dentro de los cambios de angulay y evitar los warnings de zoneless*/
   private inCtx<T>(fn: () => T): T {

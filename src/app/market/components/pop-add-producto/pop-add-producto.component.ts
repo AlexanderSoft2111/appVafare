@@ -54,7 +54,7 @@ export class PopAddProductoComponent {
       pvp: 0,
       codigo: 'xxxx',
       stock: 1,
-      fecha_caducidad: new Date(),
+      fecha_caducidad: '',
       stock_minimo: 0,
   }
 

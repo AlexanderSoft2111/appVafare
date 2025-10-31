@@ -1,0 +1,37 @@
+<!-- Vista previa de etiqueta (escala en mm) -->
+<div class="label-box">
+  <div
+    class="label"
+    [style.width.mm]="sizeWmm"
+    [style.height.mm]="sizeHmm"
+  >
+    <!-- 1) Nombre -->
+    <div class="label-name" [title]="nombreFull">{{ nombreShort }}</div>
+
+    <!-- 2) Descripción -->
+    <div class="label-desc" [title]="descripcionFull">{{ descripcionShort }}</div>
+
+    <!-- 3) PVP -->
+    <div class="label-price">
+      <span>PVP</span>
+      <strong>${{ pvp | number:'1.2-2' }}</strong>
+    </div>
+
+    <!-- 4) Código de barras -->
+    <div class="label-barcode">
+      <!-- EAN13 o CODE128; sin texto impreso (lo mostramos arriba mejor tipografiado) -->
+
+        <ngx-barcode6
+              [bc-format]="format"
+              [bc-value]="barcodeValue"
+              [bc-element-type]="'svg'"
+              [bc-display-value]="false"
+              [bc-width]="barWidthPx"
+              [bc-height]="barHeightPx"
+              [bc-margin]="0"
+              [bc-background]="'transparent'"
+              ></ngx-barcode6>
+    </div>
+  </div>
+</div>
+

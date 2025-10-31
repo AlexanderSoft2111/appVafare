@@ -22,7 +22,6 @@ import {
   logInSharp,
   logoIonic,
   people,
-  qrCode,
   server,
   statsChart,
   qrCodeSharp,
@@ -32,7 +31,7 @@ import {
   serverSharp,
   cartSharp,
   storefrontOutline,
-  logOutSharp
+  cloudUploadSharp
 } from 'ionicons/icons';
 
 import { environment } from 'src/environments/environment';
@@ -78,7 +77,6 @@ export class AppComponent {
           statsChart,
           people,
           addCircle,
-          qrCode,
           logIn,
           logInSharp,
           qrCodeSharp,
@@ -86,7 +84,8 @@ export class AppComponent {
           peopleSharp,
           statsChartSharp,
           serverSharp,
-          cartSharp
+          cartSharp,
+          cloudUploadSharp
         });
         this.permisos();
   }
@@ -118,7 +117,7 @@ export class AppComponent {
       { title: 'Inventario', url: '/market/inventario', icon: 'server' },
       { title: 'Ventas', url: '/market/ventas', icon: 'stats-chart' },
       { title: 'Generar Código', url: '/market/generarCodigo', icon: 'qr-code' },
-      { title: 'Diseño', url: '/market/diseno', icon: 'qr-code' }
+      { title: 'Importar', url: '/market/importar', icon: 'cloud-upload' }
 
     ];
     this.appPages = paginas;

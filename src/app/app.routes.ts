@@ -37,9 +37,10 @@ export const routes: Routes = [
         canActivate: [authGuards.isLoggin]
       },
       {
-        path: 'diseno',
+        path: 'importar',
         //loadComponent: () => import('./market/pages/Diseño/diseno.component'),
-        loadComponent: () => import('./market/test/test-epos/test-epos.component'),
+        //loadComponent: () => import('./market/test/test-epos/test-epos.component'),
+        loadComponent: () => import('./market/import/importar-inventario/importar-inventario.component'),
         canActivate: [authGuards.isLoggin]
       },
       {

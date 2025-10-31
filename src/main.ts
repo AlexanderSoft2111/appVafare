@@ -7,6 +7,7 @@ import { IonicStorageModule } from '@ionic/storage-angular';
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 
+import { provideHttpClient } from '@angular/common/http';
 
 import { provideFirebaseApp, initializeApp  } from '@angular/fire/app';
 import { provideFirestore, enableIndexedDbPersistence, getFirestore } from '@angular/fire/firestore';
@@ -24,6 +25,7 @@ bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
+     provideHttpClient(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
 
     /* Firebase */

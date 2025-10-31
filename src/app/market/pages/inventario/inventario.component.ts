@@ -66,7 +66,6 @@ import { PopsetProductComponent } from '../../components/pop-set-producto/pop-se
     IonButtons,
     IonToolbar,
     IonHeader,
-    DatePipe,
     IonMenuButton,
     MatTableModule,
     MatPaginatorModule,

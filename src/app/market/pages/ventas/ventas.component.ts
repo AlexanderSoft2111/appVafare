@@ -25,9 +25,14 @@ import {
 })
 export default class VentasComponent implements OnInit {
 
+  private ventaService = inject(VentaService);
+  private modalCtrl = inject(ModalController);
+  private interaccionService = inject(InteraccionService);
+  private fireAuthService = inject(FireAuthService);
+
   ventas: Venta[] = [];
-  encabezados = ['Venta', 'Fecha', 'Productos', 'IVA', 'Total']
-  encabezadosValores = ['', '', 'Productos', 'IVA', 'Total']
+  encabezados = ['Venta', 'Fecha', 'Productos', 'IVA', 'Total'];
+  encabezadosValores = ['', '', 'Productos', 'IVA', 'Total'];
   vendedor = true;
   uidAdmin = environment.uidAdmin;
 
@@ -35,12 +40,7 @@ export default class VentasComponent implements OnInit {
       total: 0,
       iva: 0,
       numVentas: 0,
-  }
-
-  private ventaService = inject(VentaService);
-  private modalCtrl = inject(ModalController);
-  private interaccionService = inject(InteraccionService);
-  private fireAuthService = inject(FireAuthService);
+  };
 
   constructor() {
           addIcons({refreshCircle,eye});
