@@ -12,9 +12,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { VentaService } from 'src/app/services/venta.service';
-import { FirestoreService } from 'src/app/services/firestore.service';
-import { InteraccionService } from 'src/app/services/interaccion.service';
+import { VentaService } from './../../../services/venta.service';
+import { FirestoreService } from './../../../services/firestore.service';
+import { InteraccionService } from '../../../services/interaccion.service'
 import {
   IonHeader,
   IonGrid,
@@ -95,7 +95,6 @@ export interface User {
 
 export default class VentaComponent implements OnInit, OnDestroy {
   private ventaService = inject(VentaService);
-  //private printer = inject(PrinterService);
   private firestoreService = inject(FirestoreService);
   private interaccionService = inject(InteraccionService);
   private popoverController = inject(PopoverController);
@@ -362,12 +361,13 @@ export default class VentaComponent implements OnInit, OnDestroy {
       this.venta.iva = 0;
       this.venta.productos.forEach(item => {
         item.precio = item.cantidad * item.producto.pvp;
-        this.venta!.subtotal_sin_iva = this.venta!.subtotal_sin_iva + (item.precio / 1.15);
-        if (item.producto.check_iva) {
+        this.venta!.total = this.venta!.total + item.precio;
+        //this.venta!.subtotal_sin_iva = this.venta!.subtotal_sin_iva + (item.precio / 1.15);
+        /* if (item.producto.check_iva) {
           this.venta!.iva = this.venta!.iva + (item.precio - (item.precio / 1.15));
           this.venta!.subtotal_con_iva = this.venta!.subtotal_con_iva + item.precio + this.venta!.iva;
-        }
-        this.venta!.total = this.venta!.subtotal_sin_iva + this.venta!.iva;
+        } */
+        //this.venta!.total = this.venta!.subtotal_sin_iva + this.venta!.iva;
       });
     }
   }
@@ -422,7 +422,9 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
 
   async saveVenta() {
+    console.log('la venta no es valida');
     if (!this.esVentaValida()) return;
+    console.log('Ingrese a la venta');
     const respuesta = await this.interaccionService.preguntaAlert(
       'Alerta',
       '¿Terminar y guardar la venta actual?'

@@ -1,68 +1,59 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Generar Código + Crear Producto</ion-title>
+
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title><strong>Generar Código</strong></ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <form [formGroup]="form">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
     <ion-grid fixed>
-
-      <!-- 1) Selección -->
+      <!-- Selección -->
       <ion-row>
         <ion-col size="12" sizeMd="8">
-<!--           <ion-card>
-            <ion-card-header>
-              <ion-card-title>1) Selección</ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <mat-radio-group [value]="modo" (change)="modo = $event.value">
-                <mat-radio-button value="nuevo">Nuevo producto</mat-radio-button>
-                <mat-radio-button value="existente" class="ml-3">Producto existente</mat-radio-button>
-              </mat-radio-group>
 
-              <div class="search-row">
-                <mat-form-field appearance="outline" class="w-100">
-                  <mat-label>Buscar producto existente…</mat-label>
-                  <input matInput formControlName="buscar" placeholder="Por código/SKU">
-                  <button mat-stroked-button type="button" (click)="buscarProductoExistente()" [disabled]="modo==='nuevo'">
-                    Buscar
-                  </button>
-                </mat-form-field>
-                @if (modo==='nuevo') {
-                  <small class="muted">Deshabilitado: estás en modo “Nuevo”.</small>
-                }
-              </div>
-            </ion-card-content>
-          </ion-card> -->
-
-          <!-- 2) Datos del producto -->
+          <!-- Datos del producto -->
           <ion-card>
             <ion-card-header>
-              <ion-card-title>2) Datos del producto</ion-card-title>
+              <ion-card-title>1) Datos del producto</ion-card-title>
             </ion-card-header>
             <ion-card-content>
               <div class="grid-2">
+
                 <mat-form-field appearance="outline">
-                  <mat-label>Código de barras / SKU</mat-label>
-                  <input matInput formControlName="codigo" maxlength="13" (blur)="validarCodigoUnico()">
-                  <mat-hint>EAN-13 (12 dígitos) o SKU alfanumérico</mat-hint>
+  <mat-label>Código de barras / SKU</mat-label>
+  <input
+    matInput
+    formControlName="codigo"
+    maxlength="13"
+    placeholder="EAN-13 (12 dígitos) o SKU"
+    #codigoInput
+    (keydown.enter)="codigoInput.blur()"
+  />
 
-                  @if (form.get('codigo')?.hasError('required')) {
-                  <mat-error >Requerido</mat-error>
-                  }
+  <!-- Requerido -->
+   @if (form.get('codigo')?.hasError('required') && form.get('codigo')?.touched) {     
+     <mat-error>
+       El código es <strong>obligatorio</strong>
+     </mat-error>
+   }
 
-                  @if (form.get('codigo')?.hasError('codigoDuplicado')) {
-                  <mat-error >Ya existe un producto con este código</mat-error>
-                  }
-                </mat-form-field>
+   @if (form.get('codigo')?.hasError('codigoDuplicado')) {     
+     <!-- Duplicado -->
+     <mat-error>
+       El código <strong>ya existe</strong> en Inventario
+     </mat-error>
+   }
+
+   @if (form.get('codigo')?.pending) {     
+     <!-- Validando -->
+     <mat-hint>Validando código…</mat-hint>
+   }
+</mat-form-field>
 
                 <mat-form-field appearance="outline">
                   <mat-label>Nombre</mat-label>
                   <input matInput formControlName="nombre">
-                  @if (form.get('nombre')?.hasError('required')) {
-                    <mat-error>Requerido</mat-error>
-                  }
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -71,8 +62,8 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Categoría</mat-label>
-                  <input matInput formControlName="categoria">
+                  <mat-label>Stock</mat-label>
+                  <input type="number" step="0.01" matInput formControlName="stock">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -86,8 +77,8 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                  <mat-label>Stock inicial</mat-label>
-                  <input type="number" matInput formControlName="stock">
+                  <mat-label>Stock minimo</mat-label>
+                  <input type="number" matInput formControlName="stock_minimo">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
@@ -95,32 +86,22 @@
                   <input type="date" matInput formControlName="fecha_caducidad">
                 </mat-form-field>
               </div>
-
-              <mat-radio-group [value]="modo" (change)="setModo($event.value)">
-                <mat-radio-button value="nuevo">Nuevo producto</mat-radio-button>
-                <mat-radio-button value="existente" class="ml-3">Producto existente</mat-radio-button>
-              </mat-radio-group>
-
-              <mat-slide-toggle formControlName="crearInventario">
-                Crear este producto en Inventario al imprimir
-              </mat-slide-toggle>
-
             </ion-card-content>
           </ion-card>
 
-          <!-- 3) Parámetros de la etiqueta -->
+          <!-- Parámetros de la etiqueta -->
           <ion-card>
             <ion-card-header>
-              <ion-card-title>3) Parámetros de la etiqueta</ion-card-title>
+              <ion-card-title>2) Parámetros de la etiqueta</ion-card-title>
             </ion-card-header>
             <ion-card-content>
               <div class="grid-2">
                 <mat-form-field appearance="outline">
-                  <mat-label>Ancho (mm)</mat-label>
+                  <mat-label>Tamaño (ancho mm)</mat-label>
                   <input type="number" matInput formControlName="sizeW">
                 </mat-form-field>
                 <mat-form-field appearance="outline">
-                  <mat-label>Alto (mm)</mat-label>
+                  <mat-label>Tamaño (alto mm)</mat-label>
                   <input type="number" matInput formControlName="sizeH">
                 </mat-form-field>
 
@@ -155,47 +136,69 @@
                 </div>
               </div>
 
-              <div class="actions">
-                <button mat-stroked-button type="button" (click)="soloImprimir()">Solo imprimir</button>
-                <button mat-flat-button color="primary" type="button" [disabled]="isSaving" (click)="guardarEImprimir()">Guardar + imprimir</button>
-              </div>
+<!--               <div class="actions">
+                <button mat-stroked-button
+                        (click)="soloImprimir()"
+                        [disabled]="cargando || form.pending || form.invalid">
+                  Solo generar etiquetas
+                </button>
 
-              @if (mensaje) {
-                <div class="msg">{{ mensaje }}</div>
-              }
+                <button mat-flat-button color="primary"
+                        (click)="guardarEImprimir()"
+                        [disabled]="cargando || form.pending || form.invalid">
+                  Guardar + imprimir
+                </button>
+              </div> -->
+
+              <div class="actions">
+  <button mat-stroked-button
+          type="button"
+          (click)="soloImprimir()"
+          [disabled]="cargando || form.pending || !puedeSoloImprimir">
+    Solo generar etiquetas
+  </button>
+
+  <button mat-flat-button color="primary"
+          type="submit"
+          [disabled]="cargando || form.pending || !puedeGuardarEImprimir">
+    Guardar + imprimir
+  </button>
+</div>
+
             </ion-card-content>
           </ion-card>
         </ion-col>
 
-        <!-- Vista previa (ZPL) -->
-        <ion-col size="12" sizeMd="4">
+        <!-- Vista previa (muestra el ZPL; si quieres, renderiza canvas) -->
+<!--         <ion-col size="12" sizeMd="4">
           <ion-card>
             <ion-card-header>
-              <ion-card-title>Vista previa Etiqueta</ion-card-title>
+              <ion-card-title>Vista previa (ZPL)</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <preview-etiqueta
-               [nombreFull]="form.value.nombre || ''"
-               [descripcionFull]="form.value.descripcion || ''"
-               [pvp]="form.value.pvp || 0"
-               [codigo]="form.value.codigo || ''"
-
-               [format]="px.format"
-               [sizeWmm]="form.value.sizeW || defaultSize.w"
-               [sizeHmm]="form.value.sizeH || defaultSize.h"
-
-               [barWidthPx]="px.barWidthPx"
-               [barHeightPx]="px.barHeightPx">
-             </preview-etiqueta>
+              <pre class="zpl-preview">{{ vistaPreviaZpl() }}</pre>
+              <p class="muted">* Sugerencia: deja 50×30 mm (203 dpi). Ajusta MD/PR si el contraste/velocidad no es óptimo.</p>
             </ion-card-content>
           </ion-card>
-          <ion-card>
-          </ion-card>
-        </ion-col>
+        </ion-col> -->
+      
+      <ion-col size="12" sizeMd="4">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Vista previa (60×40 mm)</ion-card-title>
+    </ion-card-header>
+    <ion-card-content class="preview-center">
+      <app-preview-etiqueta
+        [config]="previewConfig()"
+        [producto]="previewProducto()">
+      </app-preview-etiqueta>
 
+    </ion-card-content>
+  </ion-card>
+</ion-col>
+
+      
       </ion-row>
-
-
     </ion-grid>
   </form>
 </ion-content>

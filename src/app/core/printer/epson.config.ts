@@ -11,10 +11,10 @@ export const PAPER_WIDTH_CHARS = {
 /** Config por defecto (pensada para desarrollo en HTTP:8008) */
 export const DEFAULT_PRINTER_SETTINGS: PrinterSettings = {
   ip: '192.168.1.60',
-  port: 8008,            // DEV: HTTP → 8008
+  port: 8043,            // DEV: HTTP → 8008
   deviceId: 'local_printer',
   header: { title: 'VAFARE Supermercado', ruc: 'RUC 1234567890', address: 'Quinta Chica Baja' },
   footer: { thanks: '¡Gracias por su compra!' },
   widthChars: PAPER_WIDTH_CHARS.W58, // cambia a W58 si usas papel 58/56 mm
-  useHttps: false,         // En producción con HTTPS: true (y puerto 8043)
+  useHttps: true,         // En producción con HTTPS: true (y puerto 8043)
 };

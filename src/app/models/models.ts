@@ -1,3 +1,5 @@
+import { Timestamp } from 'firebase/firestore';
+
 export const Paths = {
   productos: 'Productos',
   clientes: 'Clientes',
@@ -9,7 +11,7 @@ export interface Producto {
   id?: string;
   nombre: string;
   date?: string;
-  updatedAt?: string;
+  updatedAt?: Timestamp | number | string;
   descripcion: string;
   costo_compra: number;
   check_iva: boolean

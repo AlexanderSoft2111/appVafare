@@ -8,7 +8,10 @@ import { ViewChild } from '@angular/core';
 // Angular Material
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
+import { MatSortModule,MatSort } from '@angular/material/sort';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+
+import { LocalPagedDataSource } from '../../components/local-paged-data/local-paged-data-source';
 
 import { PopsetstockComponent } from '../../components/popsetstock/popsetstock.component';
 
@@ -42,11 +45,12 @@ import {
   create
 } from 'ionicons/icons';
 
-import { RouterLink } from '@angular/router';
-import { DatePipe, AsyncPipe } from '@angular/common';
 import { NgClass } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { debounceTime, Subscription } from 'rxjs';
 import { PopsetProductComponent } from '../../components/pop-set-producto/pop-set-product.component';
+import { InventarioSyncService } from '../../../services/inventario-sync.service';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+
 
 
 
@@ -69,7 +73,10 @@ import { PopsetProductComponent } from '../../components/pop-set-producto/pop-se
     IonMenuButton,
     MatTableModule,
     MatPaginatorModule,
-    NgClass
+    MatProgressBarModule,
+    NgClass,
+    ReactiveFormsModule,
+    MatSortModule
   ],
 })
 export default class InventarioComponent implements OnInit, OnDestroy {
@@ -79,19 +86,21 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   private interaccionService = inject(InteraccionService);
   private clipboard = inject(Clipboard);
   private fireAuthService = inject(FireAuthService);
+  private invSync = inject(InventarioSyncService);
 
   productos: Producto[] = [];
   displayedColumns: string[] = [
     'editar',
     'nombre',
     'descripcion',
-    'costo_compra',
-    'costo_sin_iva',
+    //'costo_compra',
+    //'costo_sin_iva',
     'pvp',
     'stock',
+    'stock_minimo',
     'fecha_caducidad'
   ];
-  dataSource?: MatTableDataSource<Producto>;
+  //dataSource?: MatTableDataSource<Producto>;
   campos = [{ campo: 'nombre', label: 'Nombre' },
   { campo: 'descripcion', label: 'Descripción' },
   { campo: 'costo_compra', label: 'Costo compra' },
@@ -99,12 +108,20 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   { campo: 'pvp', label: 'PVP' },
   { campo: 'stock', label: 'Stock' },
   { campo: 'fecha_caducidad', label: 'Fecha de Caducidad' },
-  { campo: 'stock_minimo', label: 'Stock Minimo' },
+  { campo: 'stock_minimo', label: 'Stock Mínimo' },
   { campo: 'diferencia', label: 'Diferencia' },
   ];
 
-  @ViewChild(MatPaginator) paginator?: MatPaginator;
-  @ViewChild(MatSort) sort?: MatSort;
+  //@ViewChild(MatPaginator) paginator?: MatPaginator;
+  //@ViewChild(MatSort) sort?: MatSort;
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+  
+  search = new FormControl('', { nonNullable: true });
+
+  dataSource!: LocalPagedDataSource<Producto>;
+  loading = true;
 
   productosAgotados: Producto[] = [];
   productosCaducados: Producto[] = [];
@@ -125,10 +142,48 @@ export default class InventarioComponent implements OnInit, OnDestroy {
     this.subscriptionProductos?.unsubscribe();
   }
 
+ngAfterViewInit() {
+  this.dataSource = new LocalPagedDataSource<Producto>(
+    this.invSync.stream(),
+    this.paginator,
+    this.sort,
+    {
+      initialPageSize: 25,
+      filterFn: (p, term) =>
+        (p.nombre?.toLowerCase().includes(term)) ||
+        (p.descripcion?.toLowerCase().includes(term)) ||
+        (p.codigo?.toLowerCase().includes(term))
+    }
+  );
+
+  this.search.valueChanges.pipe(debounceTime(200)).subscribe(term => {
+    this.dataSource.setFilter((term ?? '').trim().toLowerCase());
+    this.paginator?.firstPage();
+  });
+}
+
   permisos() {
-    this.fireAuthService.stateAuth.subscribe(res => {
+    this.fireAuthService.stateAuth.subscribe(async res => {
       if (res !== null) {
-        this.getProductosFromServer();
+        //this.getProductosFromServer();
+      // 1) Inicializa cache y estado en memoria
+      await this.invSync.init();
+      // 2) Carga única (si hay cache no baja los 3000 otra vez)
+      await this.invSync.loadOnce();
+
+      // 3) Suscríbete al stream local (siempre rápido)
+      this.subscriptionProductos = this.invSync.stream().subscribe(list => {
+        //console.log('Productos inventario actualizados (stream local)', list);
+        //this.productos = list;
+/*         if (!this.dataSource) {
+          this.dataSource = new MatTableDataSource(this.productos.slice(0,20));
+          this.setTableData(this.dataSource);
+        } else {
+          this.dataSource.data = this.productos;
+        } */
+       this.loading = false;
+        });
+
         if (res.uid === this.uidAdmin) {
           this.vendedor = false;
         }
@@ -137,7 +192,7 @@ export default class InventarioComponent implements OnInit, OnDestroy {
     });
   }
 
-  getProductosFromServer() {
+/*   getProductosFromServer() {
     this.subscriptionProductos = this.firestoreService.getCollectionChanges<Producto>(Paths.productos, 'codigo')
       .subscribe(res => {
         this.productos = res;
@@ -148,9 +203,9 @@ export default class InventarioComponent implements OnInit, OnDestroy {
           this.dataSource.data = this.productos;
         }
       });
-  }
+  } */
 
-  getProductos() {
+/*   getProductos() {
     this.dataSource = new MatTableDataSource(this.productos);
     this.setTableData(this.dataSource);
   }
@@ -165,7 +220,7 @@ export default class InventarioComponent implements OnInit, OnDestroy {
     const filtrados = this.productos.filter(p => this.getDiasParaCaducar(p.fecha_caducidad) <= this.numeroFecha);
     this.dataSource = new MatTableDataSource(filtrados);
     this.setTableData(this.dataSource);
-  }
+  } */
 
   private setTableData(data: MatTableDataSource<Producto>) {
     setTimeout(() => {
@@ -204,14 +259,14 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   }
 
 
-  applyFilter(event: Event) {
+/*   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource!.filter = filterValue.trim().toLowerCase();
 
     if (this.dataSource!.paginator) {
       this.dataSource!.paginator.firstPage();
     }
-  }
+  } */
 
   async setStock(ev: any,producto: Producto) {
     const popover = await this.popoverController.create({

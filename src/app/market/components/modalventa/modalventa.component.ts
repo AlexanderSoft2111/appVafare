@@ -23,7 +23,7 @@ export class ModalventaComponent {
 
   @Input() venta!: Venta;
 
-  displayedColumns: string[] = ['codigo','nombre', 'cantidad', 'precio','IVA' ,'subtotal'];
+  displayedColumns: string[] = ['codigo','nombre', 'cantidad', 'precio','subtotal'];
 
   private modalCtrl = inject(ModalController);
   private printer   = inject(EpsonPrinterService);

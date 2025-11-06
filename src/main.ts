@@ -24,7 +24,7 @@ registerLocaleData(localeEs, 'es');
 bootstrapApplication(AppComponent, {
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    provideIonicAngular(),
+    provideIonicAngular({ mode: 'md', animated: true }),
      provideHttpClient(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
 

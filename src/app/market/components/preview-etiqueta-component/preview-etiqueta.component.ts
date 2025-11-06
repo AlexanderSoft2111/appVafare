@@ -1,56 +1,75 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { NgxBarcode6Module } from 'ngx-barcode6';
 
-// Angular Material
-import { MatFormFieldModule } from '@angular/material/form-field';
-import {MatSelectModule} from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
+export type BarcodeKind = 'CODE128' | 'EAN13' | 'QR';
 
+export interface EtiquetaConfig {
+  widthMm: number;    // ancho etiqueta en mm
+  heightMm: number;   // alto etiqueta en mm
+  tipoCodigo: BarcodeKind;
+  cantidad?: number;
+  qrUrl?: string;
+}
+
+export interface ProductoPreview {
+  codigo: string;       // valor a codificar (o URL si QR)
+  nombre: string;       // arriba izquierda (negrita)
+  descripcion: string;  // debajo del nombre (pequeño)
+  pvp?: number;         // precio grande a la derecha
+}
 @Component({
-  selector: 'preview-etiqueta',
-  imports: [FormsModule, NgxBarcode6Module,DecimalPipe,MatFormFieldModule, MatSelectModule,MatInputModule],
+  selector: 'app-preview-etiqueta',
+  standalone: true,
+  imports: [CommonModule, NgxBarcode6Module],
   templateUrl: './preview-etiqueta.component.html',
   styleUrls: ['./preview-etiqueta.component.scss']
 })
 export class PreviewEtiquetaComponent {
+  @Input() config: EtiquetaConfig = { widthMm: 60, heightMm: 40, tipoCodigo: 'CODE128' };
+  @Input() producto: ProductoPreview = { codigo: '', nombre: '', descripcion: '', pvp: undefined };
+  /** Zoom visual del preview (no afecta impresión) */
+  @Input() scale = 1.12;
 
-  /** ====== Inputs que vienen desde generar-codigo ====== */
-  @Input() nombreFull: string = 'Galletas Vainilla Cuencanita 1 lb';
-  @Input() descripcionFull: string = 'Galletas artesanales de vainilla';
-  @Input() pvp: number | null = 1.5;
-  @Input() codigo: string = '786800041750'; // Para EAN13: 12 dígitos (la librería calcula el 13)
 
-  /** Tamaño de la etiqueta en mm (ej.: 50x30) */
-  @Input() sizeWmm: number = 50;
-  @Input() sizeHmm: number = 30;
+  /** padding interno de la etiqueta en mm (ajústalo a gusto) */
+  readonly paddingMm = 3;
 
-  /** Barcode */
-  @Input() format: 'EAN13' | 'CODE128' = 'CODE128';
-  @Input() barWidthPx: number = 1.6;  // grosor de barra
-  @Input() barHeightPx: number = 80;  // alto del símbolo
-
-  // --- Derivados para UI (truncados elegantes) ---
-  get nombreShort() {
-    return this.trunc(this.nombreFull, 34);
-  }
-  get descripcionShort() {
-    return this.trunc(this.descripcionFull, 40);
+  get etiquetaStyle() {
+    return {
+      width: `${this.config.widthMm}mm`,
+      height: `${this.config.heightMm}mm`,
+      padding: `${this.paddingMm}mm`,
+    };
   }
 
-  // Valor para el barcode según formato
+  get showQR() { return this.config.tipoCodigo === 'QR'; }
+  get showBar() { return this.config.tipoCodigo === 'CODE128' || this.config.tipoCodigo === 'EAN13'; }
+
+  /** El valor que enviamos al código */
   get barcodeValue(): string {
-    if (this.format === 'EAN13') {
-      // EAN-13: pasar 12 dígitos; el dígito de control lo calcula ngx-barcode6
-      const digits = String(this.codigo ?? '').replace(/\D/g, '');
-      return digits.padStart(12, '0').slice(0, 12);
+    if (this.config.tipoCodigo === 'QR') {
+      return this.config.qrUrl || this.producto.codigo || '';
     }
-    return String(this.codigo ?? '').trim(); // CODE128 permite alfanumérico
+    return this.producto.codigo || '';
   }
 
-  private trunc(txt: string, max: number) {
-    if (!txt) return '';
-    return txt.length > max ? txt.slice(0, max - 1) + '…' : txt;
+  /** Formato para ngx-barcode6 */
+  get bcFormat() {
+    return this.config.tipoCodigo === 'EAN13' ? 'EAN13' : 'CODE128';
+  }
+
+  /** Hacemos el código de barras más grande */
+  get bcHeightPx(): number {
+    // Deja espacio suficiente para textos arriba y dígitos abajo
+    const altoDisponibleMm = this.config.heightMm - (this.paddingMm * 2) - 20;
+    return Math.max(48, Math.min(70, Math.round(altoDisponibleMm * 2.2)));
+  }
+  get bcBarWidth(): number { return 2.2; }   // grosor de barras
+  get bcFontPx(): number { return 16; }      // tamaño de los dígitos
+  get bcTextMargin(): number { return 2; }   // separación dígitos-barras
+
+  get precioTexto(): string {
+    return (this.producto.pvp != null) ? `$${this.producto.pvp.toFixed(2)}` : '';
   }
 }

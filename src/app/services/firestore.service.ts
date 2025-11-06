@@ -34,6 +34,37 @@
 
   constructor() {}
 
+  // 1) Leer TODO UNA VEZ (NO stream)
+async getAllOnce<T>(
+  path: string,
+  orderField: string,
+  dir: 'asc'|'desc' = 'asc',
+  idField: string = 'id'
+): Promise<T[]> {
+  const ref = collection(this.db, path);
+  const qy  = query(ref, orderBy(orderField as any, dir));
+  const snap = await getDocs(qy);
+  return snap.docs.map(d => ({ [idField]: d.id, ...(d.data() as any) })) as T[];
+}
+
+// 2) Leer SOLO DELTAS por updatedAt > since (NO stream)
+async getDeltasSince<T>(
+  path: string,
+  sinceEpochMs: number,
+  idField: string = 'id'
+): Promise<T[]> {
+  // Firestore ‘updatedAt’ es Timestamp; compara contra Date
+  const sinceDate = new Date(sinceEpochMs || 0);
+  const ref = collection(this.db, path);
+  const qy  = query(
+    ref,
+    where('updatedAt' as any, '>', sinceDate),
+    orderBy('updatedAt' as any, 'asc')
+  );
+  const snap = await getDocs(qy);
+  return snap.docs.map(d => ({ [idField]: d.id, ...(d.data() as any) })) as T[];
+}
+
 async upsertMany<T extends Record<string, any>>(
     path: string,
     items: T[],

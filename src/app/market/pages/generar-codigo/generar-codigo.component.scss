@@ -1,10 +1,4 @@
 ion-card { margin-bottom: 16px; }
-
-.search-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr;
@@ -15,6 +9,16 @@ ion-card { margin-bottom: 16px; }
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+
+.preview-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Por si hay poco alto en el card, que no quede pegado */
+  min-height: 220px;
+  padding: 12px;
+}
+
 
 .actions {
   display: flex;
@@ -33,11 +37,14 @@ ion-card { margin-bottom: 16px; }
   font-size: 12px;
   line-height: 1.25;
 }
-
-.msg { margin-top: 8px; color: #444; }
 .muted { color: #6b7280; margin-top: 6px; }
-.ml-3 { margin-left: 1rem; }
+.warn { color: #444; display: block; margin-top: 6px; }
 
+/* Responsive */
 @media (min-width: 900px) {
   .grid-2 { grid-template-columns: 1fr 1fr; }
 }
+.ml-3 { margin-left: 1rem; }
+.mt-1 { margin-top: .5rem; }
+.mt-2 { margin-top: 1rem; }
+.w-100 { width: 100%; }

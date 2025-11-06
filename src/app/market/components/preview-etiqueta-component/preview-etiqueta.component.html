@@ -1,37 +1,42 @@
-<!-- Vista previa de etiqueta (escala en mm) -->
-<div class="label-box">
-  <div
-    class="label"
-    [style.width.mm]="sizeWmm"
-    [style.height.mm]="sizeHmm"
-  >
-    <!-- 1) Nombre -->
-    <div class="label-name" [title]="nombreFull">{{ nombreShort }}</div>
+<!-- Contenedor para escalar y centrar el “lienzo” -->
+<div class="wrap" [style.transform]="'scale(' + scale + ')'" style="transform-origin: top center;">
+  <div class="etiqueta" [ngStyle]="etiquetaStyle">
+    <!-- Cabecera con nombre/descripcion a la izquierda y precio a la derecha -->
+    <div class="top">
+      <div class="izq">
+        <div class="nombre" [class.muted]="!producto.nombre">
+          {{ producto.nombre || 'Nombre del producto' }}
+        </div>
+        <div class="descripcion" [class.muted]="!producto.descripcion">
+          {{ producto.descripcion || 'Descripción del producto' }}
+        </div>
+      </div>
 
-    <!-- 2) Descripción -->
-    <div class="label-desc" [title]="descripcionFull">{{ descripcionShort }}</div>
-
-    <!-- 3) PVP -->
-    <div class="label-price">
-      <span>PVP</span>
-      <strong>${{ pvp | number:'1.2-2' }}</strong>
+      @if (precioTexto) {        
+        <div class="der">
+          <div class="precio">{{ precioTexto }}</div>
+        </div>
+      }
     </div>
 
-    <!-- 4) Código de barras -->
-    <div class="label-barcode">
-      <!-- EAN13 o CODE128; sin texto impreso (lo mostramos arriba mejor tipografiado) -->
+    <!-- Código de barras centrado abajo -->
+     @if (showBar) {       
+       <div class="code-area">
+         <ngx-barcode6
+           [bc-format]="bcFormat"
+           [bc-value]="barcodeValue"
+           [bc-display-value]="true"
+           [bc-height]="bcHeightPx"
+           [bc-width]="bcBarWidth"
+           [bc-font-size]="bcFontPx"
+           [bc-text-margin]="bcTextMargin">
+         </ngx-barcode6>
+       </div>
+     }
 
-        <ngx-barcode6
-              [bc-format]="format"
-              [bc-value]="barcodeValue"
-              [bc-element-type]="'svg'"
-              [bc-display-value]="false"
-              [bc-width]="barWidthPx"
-              [bc-height]="barHeightPx"
-              [bc-margin]="0"
-              [bc-background]="'transparent'"
-              ></ngx-barcode6>
+    <!-- QR (si algún día lo usas) -->
+    <div class="qr-area" *ngIf="showQR">
+      <div class="qr-placeholder">QR: {{ barcodeValue || '...' }}</div>
     </div>
   </div>
 </div>
-

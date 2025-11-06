@@ -115,7 +115,6 @@ export default class ImportarInventarioComponent implements OnInit {
       out.push(this.mapRowToProductoLocal(r));
     });
     this.productos = out;
-    console.log(this.productos);
   }
 
   /** Regla IVA:
@@ -155,7 +154,6 @@ export default class ImportarInventarioComponent implements OnInit {
     //const fecha_caducidad = this.parseDateDMY(row['fecha_caducidad']);
     const fecha_caducidad = this.normalizeFechaCad(row['fecha_caducidad']); // <-- string Y-M-D
 
-    console.log('fecha', fecha_caducidad);
 
     return {
       codigo,
@@ -177,7 +175,6 @@ export default class ImportarInventarioComponent implements OnInit {
     if (!this.productos.length) return;
     this.loading = true;
     this.progress = 0;
-    console.log(this.productos);
     try {
       await this.firestoreService.upsertMany(Paths.productos, this.productos, {
         idField: 'codigo',

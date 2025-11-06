@@ -1,81 +1,84 @@
-.label-box {
+/* Centra el canvas escalado */
+.wrap {
   display: flex;
   justify-content: center;
-  align-items: center;
-  background:
-    linear-gradient(to right, #f3f4f6 1px, transparent 1px) 0 0/10mm 100%,
-    linear-gradient(to bottom, #f3f4f6 1px, transparent 1px) 0 0/100% 10mm;
-  border-radius: 10px;
-  padding: 12px;
 }
 
-.label {
+/* Lienzo de la etiqueta */
+.etiqueta {
+  box-sizing: border-box;
+  border: 1px dashed #c9c9c9;
+  border-radius: 2mm;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 3.5mm 4mm 3mm;
-  display: grid;
-  grid-template-rows: auto auto auto 1fr; /* name, desc, price, barcode */
-  row-gap: 2mm;
-  overflow: hidden;
-  min-width: 30mm;
-}
-
-.label-name {
-  font-weight: 700;
-  font-size: 3.4mm;   /* ~13px */
-  line-height: 1.15;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.label-desc {
-  font-weight: 400;
-  font-size: 2.9mm;   /* ~11px */
-  line-height: 1.2;
-  color: #374151;
-  height: 3.8mm;      /* 1 línea */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.label-price {
   display: flex;
-  align-items: baseline;
-  gap: 3mm;
-
-  span {
-    font-size: 2.6mm;
-    color: #6b7280;
-    letter-spacing: .2px;
-  }
-  strong {
-    font-size: 4.2mm;  /* resalta precio */
-    color: #111827;
-    letter-spacing: .2px;
-  }
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2mm;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
-.label-barcode {
+/* Top: nombre/desc izquierda, precio derecha */
+.top {
+  display: grid;
+  grid-template-columns: 1fr auto; /* izquierda ocupa, derecha ajusta contenido */
+  column-gap: 3mm;
+  align-items: start;
+  min-height: 14mm; /* reserva altura para no chocar con el barcode */
+}
+
+.izq {
+  min-width: 0; /* permite truncar */
+}
+
+.nombre {
+  font-weight: 800;
+  font-size: 3.2mm;
+  line-height: 1.05;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.descripcion {
+  margin-top: .7mm;
+  font-size: 2.8mm;
+  line-height: 1.05;
+  font-weight: 500;
+  text-align: left;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &.muted { color: #999; font-weight: 400; }
+}
+
+.der .precio {
+  text-align: right;
+  font-size: 7mm;         /* grande */
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .1mm;
+  color: #555;
+}
+
+/* Código de barras centrado */
+.code-area,
+.qr-area {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* deja espacio suficiente para el símbolo */
-  min-height: 14mm;
+  margin-bottom: .8mm;
 
-  /* El SVG del barcode ocupa el ancho disponible, manteniendo proporción */
-  svg {
-    max-width: 100%;
-    height: auto;
-  }
+  svg { width: 100%; height: auto; }
 }
 
-.tweaks {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 8px;
+.qr-placeholder {
+  border: 1px solid #ddd;
+  border-radius: 2mm;
+  padding: 2mm 3mm;
+  font-size: 3mm;
+  color: #666;
 }

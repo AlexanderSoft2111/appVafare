@@ -50,6 +50,7 @@ export class EpsonPrinterService {
     const ePosDev = new window.epson.ePOSDevice();
 
     // 1) Conexión
+    console.log(ip, port, crypto);
     const connectRes: string = await new Promise(res => ePosDev.connect(ip, port, (r: string) => res(r)));
     if (connectRes !== 'OK' && connectRes !== 'SSL_CONNECT_OK') {
       try { ePosDev.disconnect(); } catch {}
