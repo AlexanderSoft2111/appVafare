@@ -48,20 +48,29 @@
           </button>
         </ion-col>
 
-        <!-- derecha -->
-        <ion-col size="12" sizeMd="auto" class="filters">
-<!--               <button class="btn btn-secondary m-3 normal" (click)="getProductos()">Todos</button>
-              <button class="btn btn-danger m-3 normal agotados" (click)="getProductosAgotados()">Agotados</button>
-              <button class="btn btn-warning m-3 normal" (click)="getProductosCaducados()">Caducados</button> -->
-          </ion-col>
-          </ion-row>
+
+            <ion-col size="12" sizeMd="auto" class="filters">
+              <ion-segment [value]="filterState.mode" (ionChange)="onModeChange($event)">
+                <ion-segment-button value="all">Todos</ion-segment-button>
+                <ion-segment-button value="expiry">Caducados</ion-segment-button>
+                <ion-segment-button value="stock">Agotados</ion-segment-button>
+              </ion-segment>
+            </ion-col>  
+        </ion-row>
         </ion-grid>
 
     <ion-item>
       <ion-icon slot="start" name="options"></ion-icon>
       <ion-label position="stacked">Filtrar</ion-label>
-      <ion-input placeholder="Ej. Salsa" [formControl]="search"></ion-input>
+      <!-- <ion-input placeholder="Ej. Salsa" [formControl]="search"></ion-input> -->
+      <ion-input placeholder="Nombre, descripción o código" (ionInput)="onSearch($event)"></ion-input>
     </ion-item>
+
+<!--           <ion-item>
+        <ion-icon slot="start" name="search"></ion-icon>
+        <ion-label position="stacked">Buscar</ion-label>
+        <ion-input placeholder="Nombre, descripción o código" (ionInput)="onSearch($event)"></ion-input>
+      </ion-item> -->
 
         @if (loading) {
           <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -108,7 +117,7 @@
 
             <!-- Row shown when there is no matching data. -->
             <tr class="mat-row" *matNoDataRow >
-              <td class="mat-cell" colspan="4">Ninguna coincidencia con "{{search}}"</td>
+              <td class="mat-cell" colspan="4">Ninguna coincidencia con "{{filterState.term}}"</td>
             </tr>
           </table>
 
