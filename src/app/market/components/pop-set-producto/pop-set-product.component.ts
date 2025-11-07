@@ -7,6 +7,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { combineLatest, startWith, filter, take } from 'rxjs';
 
+import { InventarioSyncService } from '../../../services/inventario-sync.service';
+
 
 import {
   IonGrid,
@@ -60,6 +62,8 @@ export class PopsetProductComponent implements OnInit, AfterViewInit {
   private toastCtrl = inject(ToastController);
   private firestoreService = inject(FirestoreService);
   private interaccionService = inject(InteraccionService);
+  private invSync = inject(InventarioSyncService);
+
   private destroyRef = inject(DestroyRef);
 
   @Input() venta: boolean = false;
@@ -84,7 +88,7 @@ export class PopsetProductComponent implements OnInit, AfterViewInit {
     pvp: [null, [Validators.required, Validators.min(0)]],
     codigo: [null, Validators.required,],
     stock: [null, [Validators.required, Validators.min(0)]],
-    fecha_caducidad: [new Date(), Validators.required],
+    fecha_caducidad: [null],
     stock_minimo: [null, [Validators.required, Validators.min(0)]],
   });
 
@@ -168,40 +172,39 @@ setCostoSinIva() {
     this.articuloForm.controls['stock_minimo'].setValue(this.newProduct?.stock_minimo);
   }
 
+
   async guardar() {
-    if (this.articuloForm.invalid) {
-      this.articuloForm.markAllAsTouched();
-      return;
-    }
-    if (this.isSaving) return;
-    this.isSaving = true;
-
-    const data: Producto = this.articuloForm.value;
-    const { id, docPath, write } = await this.firestoreService.createDocumentID<Producto>(data, Paths.productos);
-
-    // UX inmediata (funciona offline)
-    this.interaccionService.showToast(
-      this.firestoreService.isOffline() ? 'Guardado (pendiente de sincronizar)' : 'Guardado con éxito'
-    );
-    this.popoverController.dismiss({ producto: { ...data, id } });
-    this.articuloForm.reset();
-
-    // (Opcional) Avisar cuando sincronice:
-    this.firestoreService.observeSyncStatus(docPath)
-      .pipe(
-        filter(status => status === 'synced'),
-        take(1),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => this.interaccionService.showToast('Sincronizado'));
-
-    // Manejo de error real al sincronizar con backend
-    write.catch(err => {
-      this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido'));
-    }).finally(() => {
-      this.isSaving = false;
-    });
+  if (this.articuloForm.invalid || this.isSaving) {
+    this.articuloForm.markAllAsTouched();
+    return;
   }
+  this.isSaving = true;
+
+  // 1) Tomar los datos del form
+  const data: Producto = this.articuloForm.value;
+
+  // 2) Generar id y escribir en la base de datos
+  const { id, docPath, write } = await this.firestoreService.createDocumentID<Producto>(
+    data,
+    Paths.productos,
+  );
+
+  // 3) Upsert local (UI instantánea, offline OK). El invSync pondrá updatedAt y encolará.
+   await this.invSync.upsertLocal({ ...data, id });
+
+  // 4) UX y cierre
+  this.interaccionService.showToast('Guardado (se sincronizará al tener internet)');
+  this.popoverController.dismiss(); // no hace falta devolver el producto
+  this.articuloForm.reset();
+  this.isSaving = false;
+
+  // 5) (Opcional) Maneja resultado final de la escritura (errores reales de red)
+  write
+    .catch(err => this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido')))
+    .finally(() => this.isSaving = false);
+
+}
+
 
   async showToast(message: string) {
     const toast = await this.toastCtrl.create({
@@ -213,7 +216,7 @@ setCostoSinIva() {
     toast.present();
   }
 
-  async updateProduct() {
+/*   async updateProduct() {
     if (this.articuloForm.invalid || !this.newProduct?.id) {
       this.articuloForm.markAllAsTouched();
       return;
@@ -265,6 +268,45 @@ setCostoSinIva() {
     }).finally(() => {
       this.isSaving = false;
     });
+  } */
+
+  async updateProduct() {
+    if (this.articuloForm.invalid || !this.newProduct?.id || this.isSaving) {
+      this.articuloForm.markAllAsTouched();
+      return;
+    }
+    this.isSaving = true;
+
+    const id = this.newProduct.id;
+    const updateProduct: Partial<Producto> = {
+      codigo: this.articuloForm.controls['codigo'].value,
+      nombre: this.articuloForm.controls['nombre'].value,
+      descripcion: this.articuloForm.controls['descripcion'].value,
+      costo_compra: this.articuloForm.controls['costo_compra'].value,
+      check_iva: this.articuloForm.controls['check_iva'].value,
+      costo_sin_iva: this.articuloForm.controls['costo_sin_iva'].value,
+      pvp: this.articuloForm.controls['pvp'].value,
+      stock: this.articuloForm.controls['stock'].value,
+      fecha_caducidad: this.articuloForm.controls['fecha_caducidad'].value,
+      stock_minimo: this.articuloForm.controls['stock_minimo'].value
+    };
+
+    // 1) Update en Firestore (refresca updatedAt)
+    const { docPath, write } = await this.firestoreService.updateDocumentID<Producto>(
+      updateProduct, Paths.productos, id
+    );
+
+    // 2) UI inmediata (cache + stream)
+    await this.invSync.upsertLocal({ ...this.newProduct, ...updateProduct });
+
+    // 3) UX
+    this.interaccionService.showToast('Actualizado (se sincronizará al tener internet)');
+    this.popoverController.dismiss();
+
+    // 4) Errores reales
+    write
+      .catch(err => this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido')))
+      .finally(() => this.isSaving = false);
   }
 
   close() {

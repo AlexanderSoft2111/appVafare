@@ -81,9 +81,9 @@ export class InventarioSyncService {
 
   /** Carga única: si ya hay cache, no vuelve a bajar los 3000 */
   async loadOnce(): Promise<Producto[]> {
-    if (this.loaded) { 
-      this.pullDeltasInBackground(); 
-      return this.snapshot(); 
+    if (this.loaded) {
+      this.pullDeltasInBackground();
+      return this.snapshot();
     }
 
     const cached = this.snapshot();
@@ -109,6 +109,7 @@ export class InventarioSyncService {
 
     this.trySync();
   }
+
 async deleteLocal(id: string) {
     this.byId.delete(id);
     await this.flush();
@@ -118,7 +119,7 @@ async deleteLocal(id: string) {
     await this.ls.setDoc(LS_KEYS.PENDING, q);
 
     this.trySync();
-  }
+}
 
   async trySync() {
     if (this.syncing || !navigator.onLine) return;

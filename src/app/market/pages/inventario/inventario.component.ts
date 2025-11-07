@@ -135,7 +135,7 @@ export default class InventarioComponent implements OnInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  
+
   search = new FormControl('', { nonNullable: true });
 
   //dataSource!: LocalPagedDataSource<Producto>;
@@ -236,7 +236,7 @@ onSoonDays(ev: any) {
     const filtrados = this.productos.filter(p => this.getDiasParaCaducar(p.fecha_caducidad) <= this.numeroFecha);
     this.dataSource = new MatTableDataSource(filtrados);
     this.setTableData(this.dataSource);
-  } 
+  }
 
   private setTableData(data: MatTableDataSource<Producto>) {
     setTimeout(() => {
@@ -262,7 +262,7 @@ onSoonDays(ev: any) {
     }
 
     return ''; // Normal
-  } 
+  }
 
   getDiasParaCaducar(fecha: Date | string): number {
     const today = new Date();
@@ -274,7 +274,7 @@ onSoonDays(ev: any) {
     return producto.stock <= producto.stock_minimo;
   }
 
-  
+
 
   async setStock(ev: any,producto: Producto) {
     const popover = await this.popoverController.create({
@@ -298,10 +298,19 @@ onSoonDays(ev: any) {
 
   delete(producto: Producto) {
     this.interaccionService.preguntaAlert('Alerta',
-      '¿Seguro que desea eliminar?').then(res => {
+      `¿Seguro que desea eliminar a ${producto.nombre}?`).then(res => {
+        if(!producto.id){
+          return
+        }
         if (res) {
           const path = Paths.productos;
-          this.firestoreService.deleteDocumentID(path, producto.codigo);
+          this.firestoreService.deleteDocumentID(path, producto.id)
+          .catch(err => this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido')));
+
+          this.invSync.deleteLocal(producto.id).then( () => {
+            this.interaccionService.showToast('Eliminado (se sincronizará al tener internet)');
+
+          })
         }
       })
   }

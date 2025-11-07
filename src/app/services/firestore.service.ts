@@ -110,11 +110,11 @@ async upsertMany<T extends Record<string, any>>(
         }
 
         // 2) Construir payload final
-        const hasDate = Object.prototype.hasOwnProperty.call(raw, 'date');
+        //const hasDate = Object.prototype.hasOwnProperty.call(raw, 'date');
         const payload = {
           ...raw,
           id: refId,                       // guarda el id también como campo
-          date: hasDate ? (raw as any).date : serverTimestamp(),
+          date: serverTimestamp(),
           updatedAt: serverTimestamp(),
         };
 
@@ -255,6 +255,7 @@ async upsertMany<T extends Record<string, any>>(
      });
   }
 
+
   /**
    * Crea un documento (con id generado o con un id específico si lo pasas).
    * Agrega propiedades de auditoría: id (si es generado), date y updatedAt (serverTimestamp).
@@ -316,8 +317,8 @@ async upsertMany<T extends Record<string, any>>(
  * @param idDoc ID del documento a eliminar
  */
 
-  async deleteDocumentID(collectionPath: string, idDoc: string): Promise<OptimisticWrite> {
-    const refDoc = doc(this.db, `${collectionPath}/${idDoc}`);
+  async deleteDocumentID(path: string, idDoc: string): Promise<OptimisticWrite> {
+    const refDoc = doc(this.db, `${path}/${idDoc}`);
     const write = deleteDoc(refDoc);
     return { id: idDoc, docPath: refDoc.path, write };
   }
