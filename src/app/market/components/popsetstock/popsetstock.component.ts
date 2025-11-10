@@ -2,6 +2,7 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { Producto, Paths } from '../../../models/models';
 import { FirestoreService } from '../../../services/firestore.service';
 import { InteraccionService } from '../../../services/interaccion.service';
+import { InventarioSyncService } from '../../../services/inventario-sync.service';
 
 import {
   IonGrid,
@@ -37,6 +38,7 @@ export class PopsetstockComponent implements OnInit {
   private firestoreService = inject(FirestoreService);
   private interaccionService = inject(InteraccionService);
   private popoverController = inject(PopoverController);
+  private invSync = inject(InventarioSyncService);
 
   @Input() producto!: Producto;
   stock = 0;
@@ -59,23 +61,17 @@ export class PopsetstockComponent implements OnInit {
     // Lanza la actualización optimista (aplica local inmediato; la Promise espera al backend)
     const { docPath, write } = await this.firestoreService.updateDocumentID<Producto>(updateDoc, Paths.productos, this.producto.id ?? '');
 
-    // UX inmediata (funciona sin internet)
-    const offline = this.firestoreService.isOffline();
-    this.interaccionService.showToast(
-      offline ? 'Actualizado (pendiente de sincronizar)' : 'Actualizado con éxito'
-    );
+    // 2) UI inmediata (cache + stream)
+    await this.invSync.upsertLocal({ ...this.producto, ...updateDoc });
 
-    // Cierra el popup pasando el objeto actualizado al caller
-    this.popoverController.dismiss({
-      Producto: { ...this.producto, ...updateDoc },
-    });
+    // 3) UX
+    this.interaccionService.showToast('Actualizado (se sincronizará al tener internet)');
+    this.popoverController.dismiss();
 
-    // Manejo de error real al sincronizar con backend
-    write.catch(err => {
-      this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido'));
-    }).finally(() => {
-      this.isSaving = false;
-    });
+    // 4) Errores reales
+    write
+      .catch(err => this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido')))
+      .finally(() => this.isSaving = false);
   }
 
   cancelar() {

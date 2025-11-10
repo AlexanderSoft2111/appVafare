@@ -1,41 +1,19 @@
+//Angular
 import { Component, inject, OnDestroy, OnInit} from '@angular/core';
-import { FirestoreService } from '../../../services/firestore.service';
-import { Paths, Producto } from '../../../models/models';
-
 import { ViewChild } from '@angular/core';
-import type { SegmentChangeEventDetail } from '@ionic/core';
-
-
-// Angular Material
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatSortModule,MatSort } from '@angular/material/sort';
-import {MatProgressBarModule} from '@angular/material/progress-bar';
-
-import { LocalPagedDataSource } from '../../../utils/local-paged-data-source';
-
-import { PopsetstockComponent } from '../../components/popsetstock/popsetstock.component';
-
-import { InteraccionService } from '../../../services/interaccion.service';
-
+import { ReactiveFormsModule } from '@angular/forms';
+import { NgClass } from '@angular/common';
 import { Clipboard } from '@angular/cdk/clipboard';
-import { FireAuthService } from '../../../services/fire-auth.service';
-import { environment } from '../../../../environments/environment';
-import {
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonTitle,
-  IonChip,
-  IonLabel,
-  IonIcon,
-  IonContent,
-  IonItem,
-  IonInput,
-  IonButton,
-  IonMenuButton,
-  PopoverController, IonRow, IonGrid, IonCol, IonSegment, IonSegmentButton } from "@ionic/angular/standalone";
+import { Subscription } from 'rxjs';
 
+//Ionic
+import {
+  IonHeader,IonToolbar,IonButtons,IonTitle,IonChip,
+  IonLabel,IonIcon,IonContent,IonItem,IonInput,
+  IonButton,IonMenuButton,PopoverController, IonRow, 
+  IonGrid, IonCol, IonSegment, IonSegmentButton 
+} from "@ionic/angular/standalone";
+import type { SegmentChangeEventDetail } from '@ionic/core';
 import { addIcons } from 'ionicons';
 import {
   refreshCircle,
@@ -46,14 +24,31 @@ import {
   create
 } from 'ionicons/icons';
 
-import { NgClass } from '@angular/common';
-import { debounceTime, Subscription } from 'rxjs';
-import { PopsetProductComponent } from '../../components/pop-set-producto/pop-set-product.component';
-import { InventarioSyncService } from '../../../services/inventario-sync.service';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+// Angular Material
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule,MatSort } from '@angular/material/sort';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
 
-type StockFilter = 'all' | 'low' | 'out';            // low: <= stock_minimo; out: stock === 0
-type ExpiryFilter = 'all' | 'expired' | 'soon';      // soon: dentro de X días
+//servicios
+import { FirestoreService } from '../../../services/firestore.service';
+import { InteraccionService } from '../../../services/interaccion.service';
+import { FireAuthService } from '../../../services/fire-auth.service';
+import { InventarioSyncService } from '../../../services/inventario-sync.service';
+
+//componentes
+import { PopsetstockComponent } from '../../components/popsetstock/popsetstock.component';
+import { PopsetProductComponent } from '../../components/pop-set-producto/pop-set-product.component';
+
+//modelos
+import { environment } from '../../../../environments/environment';
+import { Paths, Producto } from '../../../models/models';
+
+//utils
+import { LocalPagedDataSource } from '../../../utils/local-paged-data-source';
+
+
+
 
 // Tipos para el modo del filtro
 type Mode = 'all' | 'expiry' | 'stock';
@@ -64,7 +59,6 @@ interface InventarioFilter {
   mode: Mode;       // all | expiry | stock
   soonDays: number; // cuántos días considerar "por caducar"
 }
-
 
 @Component({
   selector: 'app-inventario',
@@ -136,7 +130,7 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  search = new FormControl('', { nonNullable: true });
+
 
   //dataSource!: LocalPagedDataSource<Producto>;
   dataSource!: LocalPagedDataSource<Producto, InventarioFilter>;
@@ -154,7 +148,6 @@ export default class InventarioComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.permisos();
-
   }
 
   ngOnDestroy(): void {
@@ -175,31 +168,29 @@ ngAfterViewInit() {
   this.dataSource.setFilter(this.filterState);
 }
 
-private isStockLow = (p: Producto): boolean => p.stock <= p.stock_minimo;
-private isStockOut = (p: Producto): boolean => p.stock <= 0;
 
   permisos() {
     this.fireAuthService.stateAuth.subscribe(async res => {
       if (res !== null) {
-        //this.getProductosFromServer();
-      // 1) Inicializa cache y estado en memoria
+        this.cargarProductos();
+        if (res.uid === this.uidAdmin) {
+          this.vendedor = false;
+        }
+      }
+    });
+  }
+
+async  cargarProductos() {
+          // 1) Inicializa cache y estado en memoria
       await this.invSync.init();
       // 2) Carga única (si hay cache no baja los 3000 otra vez)
       await this.invSync.loadOnce();
 
       // 3) Suscríbete al stream local (siempre rápido)
       this.subscriptionProductos = this.invSync.stream().subscribe( () => {
-       this.loading = false;
-        });
-
-        if (res.uid === this.uidAdmin) {
-          this.vendedor = false;
-        }
-
-      }
-    });
+        this.loading = false;
+      });
   }
-
 
 /** Actualiza el texto de búsqueda y reaplica el filtro */
 onSearch(ev: any) {
@@ -220,30 +211,6 @@ onSoonDays(ev: any) {
   this.dataSource.setFilter(this.filterState);
   this.paginator?.firstPage();
 }
-
- /*   getProductos() {
-    this.dataSource = new MatTableDataSource(this.productos);
-    this.setTableData(this.dataSource);
-  }
-
-  getProductosAgotados() {
-    const filtrados = this.productos.filter(p => this.esStockCritico(p));
-    this.dataSource = new MatTableDataSource(filtrados);
-    this.setTableData(this.dataSource);
-  }
-
-  getProductosCaducados() {
-    const filtrados = this.productos.filter(p => this.getDiasParaCaducar(p.fecha_caducidad) <= this.numeroFecha);
-    this.dataSource = new MatTableDataSource(filtrados);
-    this.setTableData(this.dataSource);
-  }
-
-  private setTableData(data: MatTableDataSource<Producto>) {
-    setTimeout(() => {
-      data.paginator = this.paginator;
-      data.sort = this.sort;
-    }, 300);
-  }*/
 
   getRowClass(producto: Producto): string {
     const diasParaCaducar = this.getDiasParaCaducar(producto.fecha_caducidad);

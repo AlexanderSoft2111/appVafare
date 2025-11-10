@@ -27,6 +27,8 @@ import { Component, DestroyRef, inject, OnInit } from '@angular/core';
   import { catchError, filter, firstValueFrom, from, map, of, take } from 'rxjs';
   import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+  import { InventarioSyncService } from '../../../services/inventario-sync.service';
+
 
 
   @Component({
@@ -48,6 +50,8 @@ import { Component, DestroyRef, inject, OnInit } from '@angular/core';
       styleUrls: ['./generar-codigo.component.scss']
     })
   export default class GenerarCodigoComponent implements OnInit {
+
+     private invSync = inject(InventarioSyncService);
 
     modo: 'nuevo' | 'existente' = 'nuevo';
     impresoras: any[] = [];
@@ -267,12 +271,12 @@ import { Component, DestroyRef, inject, OnInit } from '@angular/core';
     }
 
     async guardarEImprimir() {
-        await this.esperarValidaciones();
+    await this.esperarValidaciones();
+    
     if (!this.puedeGuardarEImprimir) return; // opcional: muestra un toast
       this.cargando = true;
       this.mensaje = '';
-      try {
-        // 1) Crear/actualizar inventario si aplica
+       // 1) Crear/actualizar inventario si aplica
         if (this.form.value.crearInventario && this.modo === 'nuevo') {
           const nuevo: Producto = {
             codigo: this.form.value.codigo!,
@@ -287,38 +291,27 @@ import { Component, DestroyRef, inject, OnInit } from '@angular/core';
             costo_sin_iva: this.form.value.costo_compra || 0,
           };
           
-          const { id, docPath, write } = await this.firestoreService.createDocumentID<Producto>(nuevo, Paths.productos);
+          const { id, docPath, write } = await this.firestoreService.createDocumentID<Producto>(
+            nuevo, Paths.productos
+          );
+
+      // 3) Upsert local (UI instantánea, offline OK). El invSync pondrá updatedAt y encolará.
+      await this.invSync.upsertLocal({ ...nuevo, id });
+
                 // 2) Imprimir
         const zpl = this.vistaPreviaZpl();
         const job = multiplyJob(zpl, this.form.value.cantidad || 1);
         await this.bp.printRaw(job);
 
         // UX inmediata (funciona offline)
-        this.interaccionService.showToast(
-          this.firestoreService.isOffline() ? 'Guardado (pendiente de sincronizar)' : 'Guardado con éxito'
-        );
-        this.popoverController.dismiss({ producto: { ...nuevo, id } });
+        this.interaccionService.showToast('Guardado (se sincronizará al tener internet)');
+        this.popoverController.dismiss();
         this.resetFormulario()
-
-        // (Opcional) Avisar cuando sincronice:
-        this.firestoreService.observeSyncStatus(docPath)
-          .pipe(
-            filter(status => status === 'synced'),
-            take(1),
-            takeUntilDestroyed(this.destroyRef)
-          )
-          .subscribe(() => this.interaccionService.showToast('Sincronizado'));
-
-  /*         const res = await this.inventario.crearProducto(nuevo);
-          if (!res?.ok) throw new Error('No se pudo crear el producto en Inventario'); */
+          // 5) (Opcional) Maneja resultado final de la escritura (errores reales de red)
+  write
+    .catch(err => this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido')))
         }
-        
-      } catch (e: any) {
-        this.interaccionService.showToast('Error al sincronizar: ' + (e?.message ?? 'desconocido'));
-      } finally {
-        this.cargando = false;
-      }
-    }
+  }
 
     resetFormulario() {
     // Opcional: conserva tamaños, tipo y defaults de etiqueta

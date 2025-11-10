@@ -88,7 +88,7 @@ export class PopsetProductComponent implements OnInit, AfterViewInit {
     pvp: [null, [Validators.required, Validators.min(0)]],
     codigo: [null, Validators.required,],
     stock: [null, [Validators.required, Validators.min(0)]],
-    fecha_caducidad: [null],
+    fecha_caducidad: [''],
     stock_minimo: [null, [Validators.required, Validators.min(0)]],
   });
 
@@ -215,60 +215,6 @@ setCostoSinIva() {
     });
     toast.present();
   }
-
-/*   async updateProduct() {
-    if (this.articuloForm.invalid || !this.newProduct?.id) {
-      this.articuloForm.markAllAsTouched();
-      return;
-    }
-    if (this.isSaving) return;
-    this.isSaving = true;
-
-    const path = Paths.productos;
-    const updateDoc: Partial<Producto> = {
-      codigo: this.articuloForm.controls['codigo'].value,
-      nombre: this.articuloForm.controls['nombre'].value,
-      descripcion: this.articuloForm.controls['descripcion'].value,
-      costo_compra: this.articuloForm.controls['costo_compra'].value,
-      check_iva: this.articuloForm.controls['check_iva'].value,
-      costo_sin_iva: this.articuloForm.controls['costo_sin_iva'].value,
-      pvp: this.articuloForm.controls['pvp'].value,
-      stock: this.articuloForm.controls['stock'].value,
-      fecha_caducidad: this.articuloForm.controls['fecha_caducidad'].value,
-      stock_minimo: this.articuloForm.controls['stock_minimo'].value
-    };
-
-    // Lanza la actualización optimista (aplica local inmediato; la Promise espera al backend)
-    const { docPath, write } = await this.firestoreService
-      .updateDocumentID<Producto>(updateDoc, path, this.newProduct.id);
-
-    // UX inmediata (funciona sin internet)
-    const offline = this.firestoreService.isOffline();
-    this.interaccionService.showToast(
-      offline ? 'Actualizado (pendiente de sincronizar)' : 'Actualizado con éxito'
-    );
-
-    // Cierra el popup pasando el objeto actualizado al caller
-    this.popoverController.dismiss({
-      producto: { ...this.producto, ...updateDoc },
-    });
-
-    // (Opcional) Avisar cuando pase de pendiente -> sincronizado
-    this.firestoreService.observeSyncStatus(docPath)
-      .pipe(
-        filter(status => status === 'synced'),
-        take(1),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => this.interaccionService.showToast('Sincronizado'));
-
-    // Manejo de error real al sincronizar con backend
-    write.catch(err => {
-      this.interaccionService.showToast('Error al sincronizar: ' + (err?.message ?? 'desconocido'));
-    }).finally(() => {
-      this.isSaving = false;
-    });
-  } */
 
   async updateProduct() {
     if (this.articuloForm.invalid || !this.newProduct?.id || this.isSaving) {

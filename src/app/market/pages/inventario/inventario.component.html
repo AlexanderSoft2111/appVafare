@@ -7,7 +7,7 @@
     </ion-buttons>
     <ion-title><strong>Inventario</strong></ion-title>
     <ion-buttons slot="end">
-      <ion-chip color="dark" >(click)="getProductosFromServer()"
+      <ion-chip color="dark" (click)="cargarProductos()">
         <ion-label>Actualizar</ion-label>
         <ion-icon name="refresh-circle"></ion-icon>
       </ion-chip>
@@ -62,15 +62,9 @@
     <ion-item>
       <ion-icon slot="start" name="options"></ion-icon>
       <ion-label position="stacked">Filtrar</ion-label>
-      <!-- <ion-input placeholder="Ej. Salsa" [formControl]="search"></ion-input> -->
       <ion-input placeholder="Nombre, descripción o código" (ionInput)="onSearch($event)"></ion-input>
     </ion-item>
 
-<!--           <ion-item>
-        <ion-icon slot="start" name="search"></ion-icon>
-        <ion-label position="stacked">Buscar</ion-label>
-        <ion-input placeholder="Nombre, descripción o código" (ionInput)="onSearch($event)"></ion-input>
-      </ion-item> -->
 
         @if (loading) {
           <mat-progress-bar mode="indeterminate"></mat-progress-bar>

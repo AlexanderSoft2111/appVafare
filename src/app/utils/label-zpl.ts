@@ -19,6 +19,11 @@ export function buildZplLabel(opts: {
   const PW = mmToDots(opts.widthMm, dpi);
   const LL = mmToDots(opts.heightMm, dpi);
 
+  // === AJUSTES RÁPIDOS DEL CÓDIGO DE BARRAS ===
+  const BAR_W   = 2.4;                 // ← AJUSTA AQUÍ: grosor barras (2–5 típico en 203dpi)
+  const BAR_H   = mmToDots(22, dpi); // ← AJUSTA AQUÍ: altura en mm (22mm ≈ 176 dots)
+  const QR_MAG  = 7;                 // ← AJUSTA AQUÍ: escala QR (5–9 común)
+
   const darkness = Number.isFinite(opts.darkness) ? `^MD${opts.darkness}\n` : '';
   const speed    = Number.isFinite(opts.speed)    ? `^PR${opts.speed}\n`     : '';
 
@@ -75,14 +80,16 @@ export function buildZplLabel(opts: {
     symbol = `
 ^FO${marginX},${y}
 ^FB${contentW},1,0,C,0
-^BEN,110,Y,N
+^BY${BAR_W}                 ; ← grosor de barras
+^BEN,${BAR_H},Y,N           ; ← altura del símbolo (sube o baja con BAR_H)
 ^FD${data}^FS`;
   } else {
     const data = opts.barcodeValue || '';
     symbol = `
 ^FO${marginX},${y}
 ^FB${contentW},1,0,C,0
-^BCN,110,Y,N,N
+^BY${BAR_W}                 ; ← grosor de barras
+^BCN,${BAR_H},Y,N,N         ; ← altura del símbolo
 ^FD${data}^FS`;
   }
 
