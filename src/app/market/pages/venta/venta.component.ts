@@ -52,6 +52,7 @@ import { PopAddProductoComponent } from '../../components/pop-add-producto/pop-a
 import { EpsonPrinterService } from 'src/app/core/printer/epson-printer.service';
 import { PAPER_WIDTH_CHARS } from '../../../core/printer/epson.config';
 import { PrintSale } from '../../../core/printer/print.types';
+import { ProductPickerComponent } from '../../components/product-picker/product-picker.component';
 
 
 
@@ -281,7 +282,6 @@ export default class VentaComponent implements OnInit, OnDestroy {
   setFocusNewProducto() {
     setTimeout(() => {
       const inputs = document.getElementsByClassName("codigo") as any;
-
       if (inputs.length) {
         inputs[inputs.length - 1].setFocus();
       }
@@ -403,6 +403,45 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
   }
 
+    // AGREGA UN NUEVO PRODUCTO DE VENTA RAPIDAMENTE
+  async searchProductoRapido() {
+    // suelta el foco del botón disparador, si lo hay
+    const active = document.activeElement as HTMLElement | null;
+    active?.blur();
+
+    const popover = await this.popoverController.create({
+      component: ProductPickerComponent,
+      cssClass: 'popoverCssInventario',
+      translucent: false,
+      backdropDismiss: true,
+      mode: 'ios'
+    });
+    // opcional: espera a que el popover esté pintado y mueve foco a su primer input
+    await popover.present();
+  const first = document.querySelector('.popoverCssInventario ion-input') as any;
+  first?.setFocus?.();
+
+    const { data } = await popover.onWillDismiss();
+    if (data) {
+      const producto = data as Producto;
+
+      const item: ProductoVenta = {
+        cantidad: 1,
+        precio: producto.pvp,
+        producto,
+      }
+      
+      if (!this.venta!.productos[this.venta!.productos.length - 1].producto.codigo) {
+        this.venta!.productos[this.venta!.productos.length - 1] = item;
+      } else {
+        this.venta!.productos.push(item);
+      }
+      this.ventaService.saveVenta();
+      this.addProducto();
+    }
+
+  }
+
   resetVenta() {
     this.interaccionService.preguntaAlert('Alerta',
       '¿Seguro que desea resetear la venta actual?').then(res => {
@@ -422,7 +461,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
 
   async saveVenta() {
-    console.log('la venta no es valida');
+  
     if (!this.esVentaValida()) return;
     console.log('Ingrese a la venta');
     const respuesta = await this.interaccionService.preguntaAlert(

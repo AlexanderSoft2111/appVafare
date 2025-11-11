@@ -1,0 +1,30 @@
+/* base */
+.mat-mdc-row {
+  cursor: pointer;
+  transition: background 120ms ease-in-out, outline-color 120ms ease-in-out;
+}
+
+/* hover (cuando el mouse pasa por la fila) */
+.mat-mdc-row.is-hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* seleccionada (clic) */
+.mat-mdc-row.is-selected {
+  background: rgba(13, 110, 253, 0.14);      /* azul suave */
+  outline: 2px solid rgba(13, 110, 253, 0.35);
+  outline-offset: -2px;
+}
+
+/* enfoque por teclado (accesible) */
+.mat-mdc-row:focus-visible {
+  outline: 2px solid rgba(13, 110, 253, 0.6);
+  outline-offset: -2px;
+}
+
+/* opcional: sutil borde inferior para filas */
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+.mat-mdc-row .mat-mdc-cell { padding-top: 10px; padding-bottom: 10px; }

@@ -83,3 +83,12 @@ input {
   width: 100%;
   margin-top: 10px;
 }
+
+.codigo-col .codigo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.codigo-col ion-input.codigo {
+  flex: 1 1 auto;
+}

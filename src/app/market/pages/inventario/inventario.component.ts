@@ -131,8 +131,6 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
 
 
-
-  //dataSource!: LocalPagedDataSource<Producto>;
   dataSource!: LocalPagedDataSource<Producto, InventarioFilter>;
   loading = true;
 

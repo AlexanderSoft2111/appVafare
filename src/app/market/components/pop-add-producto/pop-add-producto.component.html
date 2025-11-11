@@ -27,7 +27,11 @@
                         <div class="col">
                           <ion-item class="none">
                             <ion-label position="floating">Nombre</ion-label>
-                            <ion-input [(ngModel)]="producto.nombre" class="normal" matInput></ion-input>
+                            <ion-input 
+                              [(ngModel)]="producto.nombre" 
+                              class="normal nombre" 
+                              matInput
+                              (keydown.enter)="add()"></ion-input>
                           </ion-item>
                         </div>
                     </div>
@@ -38,7 +42,8 @@
                           <ion-label position="floating">PVP</ion-label>
                           <ion-input class="normal" matInput type="number"
                           placeholder="0"
-                          [(ngModel)]="producto.pvp"></ion-input>
+                          [(ngModel)]="producto.pvp"
+                          (keydown.enter)="add()"></ion-input>
                         </ion-item>
                        </div>
                   </div>

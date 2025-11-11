@@ -17,6 +17,7 @@ import {
 } from "@ionic/angular/standalone";
 
 import { addIcons } from 'ionicons';
+import { InteraccionService } from '../../../services/interaccion.service';
 import {
   checkbox,
   close
@@ -41,9 +42,10 @@ import {
     FormsModule
     ]
 })
-export class PopAddProductoComponent {
+export class PopAddProductoComponent implements OnInit {
 
   private popoverController = inject(PopoverController);
+  private InteraccionService = inject(InteraccionService);
 
   producto: Producto = {
       nombre: '',
@@ -59,11 +61,32 @@ export class PopAddProductoComponent {
   }
 
   constructor() {
-    addIcons({checkbox,close})
+    addIcons({checkbox,close});
+  }
+  ngOnInit(): void {
+    this.setFocusNewProducto();
   }
 
+    setFocusNewProducto() {
+    setTimeout(() => {
+      const inputs = document.getElementsByClassName("nombre") as any;
+      if (inputs.length) {
+        inputs[inputs.length - 1].setFocus();
+      }
+    }, 300);
+  }
+
+
   add() {
-      this.popoverController.dismiss(this.producto);
+    if (this.producto.nombre.trim().length === 0) {
+      this.InteraccionService.showToast('El nombre del producto es obligatorio',1000);
+      return;
+    }
+    if (this.producto.pvp <= 0) {
+      this.InteraccionService.showToast('El precio del producto debe ser mayor a cero',1000);
+      return;
+    }
+    this.popoverController.dismiss(this.producto);
   }
 
   close() {

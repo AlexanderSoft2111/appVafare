@@ -106,8 +106,16 @@ p {
     --max-width: 94vw;
   }
 }
-
-
 .native-input {
     padding: 5px !important;
 }
+
+/* ancho del popover */
+.popoverCssInventario {
+  --width: 900px;        /* desktop */
+  --max-width: 95vw;     /* no exceder viewport */
+  --height: auto;
+  --max-height: 95vh;    /* por si acaso */
+  --backdrop-opacity: .25;
+}
+
