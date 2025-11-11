@@ -36,13 +36,11 @@ export const routes: Routes = [
         loadComponent: () => import('./market/pages/clientes/clientes.component'),
         canActivate: [authGuards.isLoggin]
       },
-      {
+/*       {
         path: 'importar',
-        //loadComponent: () => import('./market/pages/Diseño/diseno.component'),
-        //loadComponent: () => import('./market/test/test-epos/test-epos.component'),
         loadComponent: () => import('./market/import/importar-inventario/importar-inventario.component'),
         canActivate: [authGuards.isLoggin]
-      },
+      }, */
       {
         path: '**',
         redirectTo: 'venta',

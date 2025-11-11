@@ -8,8 +8,16 @@
     </ion-item>
     <ion-item class="none">
       <ion-label position="floating"> <strong>Stock:</strong></ion-label>
-      <ion-input class="text-center" type="number" [(ngModel)]="stock"></ion-input>
+      <ion-input class="text-center" type="number" [(ngModel)]="stock" [readonly]="vendedor"></ion-input>
     </ion-item>
+
+    @if (vendedor) {
+      <ion-item class="none">
+        <ion-label position="floating"><strong>Agregar unidades</strong></ion-label>
+        <ion-input class="text-center" type="number" [(ngModel)]="cantidadAgregar" [min]="1"></ion-input>
+      </ion-item>
+    }
+
     <ion-grid class="none">
       <ion-row class="ion-justify-content-end">
           <ion-col size="auto">

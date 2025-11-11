@@ -8,8 +8,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import {
   IonButtons,
   IonLabel,IonIcon,IonItem,IonInput,
-  IonButton,PopoverController 
-} from "@ionic/angular/standalone";
+  IonButton,PopoverController, IonSearchbar } from "@ionic/angular/standalone";
 
 import { addIcons } from 'ionicons';
 import {
@@ -46,9 +45,8 @@ interface InventarioFilter {
   selector: 'app-product-picker',
   templateUrl: './product-picker.component.html',
   styleUrls: ['./product-picker.component.scss'],
-  imports: [
+  imports: [IonSearchbar,
     IonButton,
-    IonInput,
     IonItem,
     IonIcon,
     IonLabel,
@@ -63,11 +61,11 @@ interface InventarioFilter {
 export class ProductPickerComponent implements OnInit,OnDestroy {
 
   private popoverController = inject(PopoverController);
-  private InteraccionService = inject(InteraccionService);
+
   private invSync = inject(InventarioSyncService);
   private cdr = inject(ChangeDetectorRef);   // ⬅️ inyección
-  private booted = false;        
-              // ⬅️ flag
+  private booted = false;
+
   filterState: InventarioFilter = {
   term: '',
   mode: 'all',
@@ -121,18 +119,18 @@ export class ProductPickerComponent implements OnInit,OnDestroy {
     this.subscriptionProductos?.unsubscribe();
   }
 
-  
+
   ngAfterViewInit() {
     this.dataSource = new LocalPagedDataSource<Producto, InventarioFilter>(
       this.invSync.stream(),
       this.paginator!,
       this.sort!,
       {
-        initialPageSize: 10,
+        initialPageSize: 5,
         filterFn: (p, f) => this.applyFilter(p, f),
       }
     );
-  
+
     this.dataSource.setFilter(this.filterState);
     this.booted = true;
     this.cdr.detectChanges();
@@ -183,7 +181,7 @@ confirm(row?: Producto) {
     this.dataSource.setFilter(this.filterState);
     this.paginator?.firstPage();
   }
-  
+
   // --- Helpers para el filtro ----
 
   private matchesText(p: Producto, term: string) {
@@ -198,10 +196,10 @@ confirm(row?: Producto) {
   private applyFilter(p: Producto, f: InventarioFilter): boolean {
     // 1) texto
     if (!this.matchesText(p, f.term)) return false;
-  
+
     // 2) modo
     if (f.mode === 'all') return true;
-  
+
     return true;
   }
 

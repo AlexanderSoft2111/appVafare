@@ -37,7 +37,7 @@ import {
 import { environment } from '../environments/environment';
 import { FireAuthService } from './services/fire-auth.service';
 
-
+type Role = 'admin' | 'vendedor';
 
 @Component({
   selector: 'app-root',
@@ -60,6 +60,9 @@ import { FireAuthService } from './services/fire-auth.service';
 })
 
 export class AppComponent {
+  private fireAuthService = inject(FireAuthService);
+
+
   uidAdmin = environment.uidAdmin;
   admin = false;
   vendedor = true;
@@ -69,7 +72,6 @@ export class AppComponent {
 
     { title: 'Login', url: '/market/login', icon: 'log-in' }
   ];
-  private fireAuthService = inject(FireAuthService);
   constructor() {
     addIcons({
       logoIonic,
@@ -120,7 +122,7 @@ export class AppComponent {
       { title: 'Inventario', url: '/market/inventario', icon: 'server' },
       { title: 'Ventas', url: '/market/ventas', icon: 'stats-chart' },
       { title: 'Generar Código', url: '/market/generarCodigo', icon: 'qr-code' },
-      { title: 'Importar', url: '/market/importar', icon: 'cloud-upload' }
+      //{ title: 'Importar', url: '/market/importar', icon: 'cloud-upload' }
 
     ];
     this.appPages = paginas;

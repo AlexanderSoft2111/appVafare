@@ -1,4 +1,3 @@
-//Angular
 import { Component, inject, OnDestroy, OnInit} from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -6,13 +5,16 @@ import { NgClass } from '@angular/common';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { Subscription } from 'rxjs';
 
+// + añade:
+import { ChangeDetectorRef } from '@angular/core';
+
+
 //Ionic
 import {
   IonHeader,IonToolbar,IonButtons,IonTitle,IonChip,
   IonLabel,IonIcon,IonContent,IonItem,IonInput,
-  IonButton,IonMenuButton,PopoverController, IonRow, 
-  IonGrid, IonCol, IonSegment, IonSegmentButton 
-} from "@ionic/angular/standalone";
+  IonButton,IonMenuButton,PopoverController, IonRow,
+  IonGrid, IonCol, IonSegment, IonSegmentButton, IonSearchbar } from "@ionic/angular/standalone";
 import type { SegmentChangeEventDetail } from '@ionic/core';
 import { addIcons } from 'ionicons';
 import {
@@ -64,7 +66,7 @@ interface InventarioFilter {
   selector: 'app-inventario',
   templateUrl: './inventario.component.html',
   styleUrls: ['./inventario.component.scss'],
-  imports: [IonSegmentButton, IonSegment, IonCol, IonGrid, IonRow,
+  imports: [ IonSegmentButton, IonSegment, IonCol, IonGrid, IonRow,
     IonButton,
     IonInput,
     IonItem,
@@ -95,6 +97,7 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   private clipboard = inject(Clipboard);
   private fireAuthService = inject(FireAuthService);
   private invSync = inject(InventarioSyncService);
+   private cdr = inject(ChangeDetectorRef);
 
 
   filterState: InventarioFilter = {
@@ -103,8 +106,36 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   soonDays: 30,
   };
 
+  private readonly COSTS_KEY = 'inv.showCosts';
+  showCosts = false;
+
   productos: Producto[] = [];
-  displayedColumns: string[] = [
+
+    /** Columnas base siempre visibles */
+  private baseCols: string[] = [
+    'editar',
+    'nombre',
+    'descripcion',
+    'pvp',
+    'stock',
+    'stock_minimo',
+    'fecha_caducidad'
+  ];
+
+    /** Columnas de costo (solo para admin cuando showCosts = true) */
+  private costCols: string[] = ['costo_compra','costo_sin_iva'];
+
+
+  /** Getter que decide qué columnas mostrar */
+  get columns(): string[] {
+    if (!this.showCosts) return this.baseCols;
+    const i = this.baseCols.indexOf('descripcion');
+    const before = this.baseCols.slice(0, i + 1);
+    const after  = this.baseCols.slice(i + 1);
+    return [...before, ...this.costCols, ...after];
+  }
+
+/*   displayedColumns: string[] = [
     'editar',
     'nombre',
     'descripcion',
@@ -114,22 +145,25 @@ export default class InventarioComponent implements OnInit, OnDestroy {
     'stock',
     'stock_minimo',
     'fecha_caducidad'
-  ];
-  //dataSource?: MatTableDataSource<Producto>;
-  campos = [{ campo: 'nombre', label: 'Nombre' },
-  { campo: 'descripcion', label: 'Descripción' },
-  { campo: 'costo_compra', label: 'Costo compra' },
-  { campo: 'costo_sin_iva', label: 'Costo sin IVA' },
-  { campo: 'pvp', label: 'PVP' },
-  { campo: 'stock', label: 'Stock' },
-  { campo: 'fecha_caducidad', label: 'Fecha de Caducidad' },
-  { campo: 'stock_minimo', label: 'Stock Mínimo' },
-  { campo: 'diferencia', label: 'Diferencia' },
+  ]; */
+
+  // Ajusta tus "campos" para que existan los contenedores de todas las columnas de datos:
+  campos = [
+    { campo: 'nombre', label: 'Nombre' },
+    { campo: 'descripcion', label: 'Descripción' },
+    { campo: 'costo_compra', label: 'Costo compra' },   // estarán ocultas a nivel de columns
+    { campo: 'costo_sin_iva', label: 'Costo sin IVA' }, // idem
+    { campo: 'pvp', label: 'PVP' },
+    { campo: 'stock', label: 'Stock' },
+    { campo: 'stock_minimo', label: 'Stock Mínimo' },
+    { campo: 'fecha_caducidad', label: 'Fecha de Caducidad' },
   ];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  hovered: Producto | null = null;
+  selected: Producto | null = null;
 
   dataSource!: LocalPagedDataSource<Producto, InventarioFilter>;
   loading = true;
@@ -142,10 +176,14 @@ export default class InventarioComponent implements OnInit, OnDestroy {
   numeroFecha: number = 70;
   subscriptionProductos?: Subscription;
 
+
+
   constructor() { addIcons({ refreshCircle, options, copy, trash, create }) }
 
   ngOnInit() {
     this.permisos();
+        // cargar preferencia local
+    this.showCosts = localStorage.getItem(this.COSTS_KEY) === '1';
   }
 
   ngOnDestroy(): void {
@@ -176,6 +214,14 @@ ngAfterViewInit() {
         }
       }
     });
+  }
+
+    /** Solo admin puede alternar columnas de costo */
+  toggleCosts() {
+    if (this.vendedor) return;     // vendedor no puede
+    this.showCosts = !this.showCosts;
+    localStorage.setItem(this.COSTS_KEY, this.showCosts ? '1' : '0');
+    this.cdr.detectChanges();      // refresca header/rows
   }
 
 async  cargarProductos() {
@@ -248,7 +294,7 @@ onSoonDays(ev: any) {
       cssClass: 'popoverCss',
       translucent: false,
       backdropDismiss: true,
-      componentProps: { producto },
+      componentProps: { producto,vendedor: this.vendedor },
       mode: 'ios'
     });
     await popover.present();
@@ -286,7 +332,7 @@ onSoonDays(ev: any) {
       cssClass: 'popoverCssProducto',
       translucent: false,
       backdropDismiss: true,
-      componentProps: { newProduct },
+      componentProps: { newProduct, vendedor: this.vendedor },
       mode: 'ios'
     });
     await popover.present();

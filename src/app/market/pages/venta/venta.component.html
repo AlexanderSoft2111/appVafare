@@ -82,9 +82,6 @@
             <ion-button (click)="addProductoRapido()">
               <ion-icon slot="icon-only" color="success" name="add-circle"></ion-icon>
             </ion-button>
-<!--             <ion-button [routerLink]="['/market/addinventario']" routerLinkActive="router-link-active" >
-              <ion-icon slot="icon-only" color="primary" name="create"></ion-icon>
-            </ion-button> -->
           </ion-buttons>
         </ion-item>
 
@@ -108,8 +105,8 @@
                           (keyup)="onKeyupCodigo(i)"
                           (keydown.enter)="onEnterCodigo(i)">
                         </ion-input>
-                        <ion-button fill="clear" 
-                                    size="small" 
+                        <ion-button fill="clear"
+                                    size="small"
                                     aria-label="Buscar producto"
                                     (click)="searchProductoRapido()">
                           <ion-icon slot="icon-only" name="search" color="dark"></ion-icon>

@@ -86,7 +86,7 @@
     <ion-col size="12" sizeMd="6" sizeLg="4" sizeXl="4">
       <mat-form-field>
         <mat-label>Stock:</mat-label>
-        <input matInput type="number" formControlName="stock">
+        <input matInput type="number" formControlName="stock" [readonly]="vendedor">
         @if (campoNoValido('stock')) { <mat-error>El stock <strong>es requerido</strong></mat-error> }
       </mat-form-field>
     </ion-col>

@@ -68,6 +68,8 @@ export class PopsetProductComponent implements OnInit, AfterViewInit {
 
   @Input() venta: boolean = false;
   @Input() newProduct?: Producto;
+  @Input() vendedor: boolean = false;
+
   @ViewChild('codigo', { read: ElementRef }) codigoInput?: ElementRef<HTMLInputElement>;
 
 
@@ -97,6 +99,7 @@ export class PopsetProductComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     this.subscribirCalculosIva();
     if (this.newProduct) this.recibirProducto();
+    console.log(this.vendedor)
   }
 
   ngAfterViewInit() {

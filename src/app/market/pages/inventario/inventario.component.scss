@@ -1,46 +1,48 @@
-table {
-    width: 100%;
-  }
+/* Tabla y celdas */
+table { width: 100%; }
+td, th {
+  width: auto;
+  max-width: 100px;
+  min-width: 50px;
+  text-align: center !important;
+}
+th { font-weight: bold; }
 
-  .mat-form-field {
-    font-size: 14px;
-    width: 100%;
-  }
+/* Estados por negocio */
+.red    { background: #dc3545;  color: #fff; }
+.yellow { background: #ffc107; }
+.orange { background: #fc9700; color: #fff; }
 
-
-  td, th {
-    width: auto;
-    max-width: 100px;
-    min-width: 50px;
-    text-align: center !important;
-  }
-
-  th {
-    font-weight: bold;
-  }
-
-.red{
-  background: #dc3545;
-
-  td{
-    color: white !important;
-
-  }
-
+/* Interacción base */
+.mat-mdc-row {
+  cursor: pointer;
+  transition: background 120ms ease-in-out, box-shadow 120ms ease-in-out, filter 120ms ease-in-out;
 }
 
-.yellow{
-  background: #ffc107;
+/* Hover genérico (filas sin color de estado) */
+.mat-mdc-row.is-hover:not(.red):not(.yellow):not(.orange) {
+  background: rgba(0, 0, 0, 0.05);
 }
 
-.orange{
-  background: #fc9700;
-
-  td{
-    color: white !important;
-
-  }
+/* Hover sobre filas con color de estado: solo oscurece un poco */
+.red.is-hover,
+.yellow.is-hover,
+.orange.is-hover {
+  filter: brightness(0.95);
 }
+
+/* Selección por clic (opcional) */
+.mat-mdc-row.is-selected {
+  outline: 2px solid var(--ion-color-primary, #1a73e8);
+  outline-offset: -2px;
+}
+
+/* Accesibilidad: foco con teclado */
+.mat-mdc-row:focus-visible {
+  outline: 2px solid var(--ion-color-primary, #1a73e8);
+  outline-offset: -2px;
+}
+
 
   .button-next {
 
@@ -53,13 +55,29 @@ table {
 
 }
 
-.btnCliente{
-    padding: 0;
+
+
+.filter-item {
+  --inner-padding-end: 8px;     /* un poco menos de padding al final */
 }
 
-.groupBotones{
-      display: flex;
-    justify-content: right;
+.filter-item ion-input {
+  margin-right: 12px;           /* separa input del chip */
+}
+
+.chip-toggle {
+  height: 28px;                 /* compacto */
+  border-radius: 14px;
+  padding: 0 10px;
+  align-self: center;           /* centra verticalmente dentro del item */
+  /* opcional: estilo más sutil */
+  /* --background: var(--ion-color-light); */
+}
+
+@media (max-width: 768px) {
+  .chip-toggle {
+    margin-top: 6px;            /* si el layout se apila en móviles */
+  }
 }
 
 

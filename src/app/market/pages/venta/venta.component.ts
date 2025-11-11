@@ -1,9 +1,9 @@
-import { Component, inject, OnDestroy, OnInit, signal, NgZone } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 
 
 import { Cliente, Venta, Producto, Paths, ProductoVenta } from '../../../models/models';
 import { Observable, Subscription, combineLatest } from 'rxjs';
-import { startWith, debounceTime, map } from 'rxjs/operators';
+import { startWith, debounceTime, map, take } from 'rxjs/operators';
 
 
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
@@ -34,7 +34,6 @@ import {
   PopoverController
 } from "@ionic/angular/standalone";
 import { DatePipe, AsyncPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 
 import { addIcons } from 'ionicons';
 import {
@@ -53,8 +52,6 @@ import { EpsonPrinterService } from 'src/app/core/printer/epson-printer.service'
 import { PAPER_WIDTH_CHARS } from '../../../core/printer/epson.config';
 import { PrintSale } from '../../../core/printer/print.types';
 import { ProductPickerComponent } from '../../components/product-picker/product-picker.component';
-
-
 
 export interface User {
   name: string;
@@ -82,7 +79,6 @@ export interface User {
     IonFooter,
     DatePipe,
     AsyncPipe,
-    RouterLink,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -101,6 +97,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
   private popoverController = inject(PopoverController);
   private printer = inject(EpsonPrinterService);
 
+  private lastVentaIdWithDefault?: string | number; // para no repetir en la misma venta
 
   venta?: Venta;
   suscriberVenta: Subscription;
@@ -134,7 +131,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
       this.venta = res;
       this.addProducto();
       this.calcularValores();
-      this.changePago();
+      //this.changePago();
     });
     this.addProducto();
     this.calcularValores();
@@ -160,10 +157,17 @@ export default class VentaComponent implements OnInit, OnDestroy {
         const texto = typeof input === 'string' ? input.toLowerCase() : input?.nombre?.toLowerCase() || '';
         return clientes.filter(cliente =>
           cliente.nombre.toLowerCase().includes(texto) ||
-          cliente.ruc?.toLowerCase().includes('0999999999999')
+          cliente.ruc?.toLowerCase().includes('')
         );
       })
     );
+
+    this.suscriberVenta = this.ventaService.getVentaChanges().subscribe(v => {
+    this.venta = v;
+    this.clienteControl.setValue(this.venta?.cliente, { emitEvent: false }); // 👈 muestra CF
+  });
+
+
   }
 
 
@@ -300,7 +304,6 @@ export default class VentaComponent implements OnInit, OnDestroy {
     const productoExist = this.venta!.productos.find(producto => {
       return producto.producto.codigo === newproducto.codigo
     });
-
     if (productoExist!.producto.nombre) {
       productoExist!.cantidad++;
       this.clearInput();
@@ -312,6 +315,49 @@ export default class VentaComponent implements OnInit, OnDestroy {
     }
   }
 
+
+  // AGREGA UN NUEVO PRODUCTO DE VENTA RAPIDAMENTE
+  async searchProductoRapido() {
+    // suelta el foco del botón disparador, si lo hay
+    const active = document.activeElement as HTMLElement | null;
+    active?.blur();
+
+    const popover = await this.popoverController.create({
+      component: ProductPickerComponent,
+      cssClass: 'popoverCssInventario',
+      translucent: false,
+      backdropDismiss: true,
+      mode: 'ios'
+    });
+    // opcional: espera a que el popover esté pintado y mueve foco a su primer input
+    await popover.present();
+    const first = document.querySelector('.popoverCssInventario ion-input') as any;
+    first?.setFocus?.();
+
+    const { data } = await popover.onWillDismiss();
+    if (data) {
+      const productoRecibido = data as Producto;
+
+      const item: ProductoVenta = {
+        cantidad: 1,
+        precio: productoRecibido.pvp,
+        producto: productoRecibido,
+      }
+
+      const productoExist = this.venta!.productos.find(producto => {
+      return producto.producto.codigo === productoRecibido.codigo
+      });
+      if (!productoExist) {
+        this.venta!.productos[this.venta!.productos.length - 1] = item;
+        this.ventaService.saveVenta();
+        this.addProducto();
+      } else {
+        productoExist!.cantidad++;
+        this.clearInput();
+        this.ventaService.saveVenta();
+      }
+    }
+  }
 
   addCantidad(producto: ProductoVenta) {
     producto.cantidad++;
@@ -403,50 +449,13 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
   }
 
-    // AGREGA UN NUEVO PRODUCTO DE VENTA RAPIDAMENTE
-  async searchProductoRapido() {
-    // suelta el foco del botón disparador, si lo hay
-    const active = document.activeElement as HTMLElement | null;
-    active?.blur();
-
-    const popover = await this.popoverController.create({
-      component: ProductPickerComponent,
-      cssClass: 'popoverCssInventario',
-      translucent: false,
-      backdropDismiss: true,
-      mode: 'ios'
-    });
-    // opcional: espera a que el popover esté pintado y mueve foco a su primer input
-    await popover.present();
-  const first = document.querySelector('.popoverCssInventario ion-input') as any;
-  first?.setFocus?.();
-
-    const { data } = await popover.onWillDismiss();
-    if (data) {
-      const producto = data as Producto;
-
-      const item: ProductoVenta = {
-        cantidad: 1,
-        precio: producto.pvp,
-        producto,
-      }
-      
-      if (!this.venta!.productos[this.venta!.productos.length - 1].producto.codigo) {
-        this.venta!.productos[this.venta!.productos.length - 1] = item;
-      } else {
-        this.venta!.productos.push(item);
-      }
-      this.ventaService.saveVenta();
-      this.addProducto();
-    }
-
-  }
 
   resetVenta() {
     this.interaccionService.preguntaAlert('Alerta',
       '¿Seguro que desea resetear la venta actual?').then(res => {
         if (res) {
           this.ventaService.resetVenta();
+
         }
       })
   }
@@ -461,7 +470,7 @@ export default class VentaComponent implements OnInit, OnDestroy {
 
 
   async saveVenta() {
-  
+
     if (!this.esVentaValida()) return;
     console.log('Ingrese a la venta');
     const respuesta = await this.interaccionService.preguntaAlert(
@@ -492,6 +501,8 @@ export default class VentaComponent implements OnInit, OnDestroy {
       };
 
       await this.ventaService.saveVentaTerminada(); // Esperar a que guarde
+
+
       // Antes de imprimir (elige 80mm o 58mm):
       this.printer.setSettings({ widthChars: PAPER_WIDTH_CHARS.W58 }); // ó W80
       try {

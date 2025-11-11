@@ -5,10 +5,22 @@ import { InteraccionService } from './interaccion.service';
 import { LocalstorageService } from './localstorage.service';
 import { FirestoreService } from './firestore.service';
 
+const DEFAULT_CF = {
+  nombre: 'CONSUMIDOR FINAL',
+  ruc: '0999999999999',
+  direccion: 'Cuenca',
+  telefono: '0999999999',
+  email: '',
+};
+
 @Injectable({
   providedIn: 'root'
 })
 export class VentaService {
+
+  private localstorageService = inject(LocalstorageService);
+  private firestoreService = inject(FirestoreService);
+  private interaccionService = inject(InteraccionService);
 
   venta?: Venta;
   ventas: Venta[] = [];
@@ -17,9 +29,6 @@ export class VentaService {
   pathLocal = 'venta';
   numeroVenta?: NumeroVenta;
 
-  private localstorageService = inject(LocalstorageService);
-  private firestoreService = inject(FirestoreService);
-  private interaccionService = inject(InteraccionService);
 
   constructor() {
         this.setVenta();
@@ -51,13 +60,7 @@ export class VentaService {
   async initVenta() {
       this.venta = {
         productos: [],
-        cliente: {
-          nombre: '',
-          ruc: '',
-          direccion: '',
-          telefono: '',
-          email: '',
-        },
+        cliente: { ...DEFAULT_CF  },
         subtotal_sin_iva: 0,
         subtotal_con_iva: 0,
         iva: 0,

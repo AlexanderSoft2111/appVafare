@@ -27,9 +27,6 @@
 
   <div class="p-4">
 
-    <div class="groupBotones">
-    </div>
-
     <ion-grid class="top-actions-grid" fixed>
       <ion-row class="ion-align-items-center ion-justify-content-between">
         <!-- izquierda -->
@@ -55,15 +52,24 @@
                 <ion-segment-button value="expiry">Caducados</ion-segment-button>
                 <ion-segment-button value="stock">Agotados</ion-segment-button>
               </ion-segment>
-            </ion-col>  
-        </ion-row>
+
+            </ion-col>
+          </ion-row>
         </ion-grid>
 
-    <ion-item>
-      <ion-icon slot="start" name="options"></ion-icon>
-      <ion-label position="stacked">Filtrar</ion-label>
-      <ion-input placeholder="Nombre, descripción o código" (ionInput)="onSearch($event)"></ion-input>
-    </ion-item>
+        <ion-item>
+          <ion-icon slot="start" name="options"></ion-icon>
+          <ion-input placeholder="Buscar por Nombre, descripción o código" (ionInput)="onSearch($event)"></ion-input>
+            @if (!vendedor) {
+              <ion-chip
+                slot="end"
+                class="chip-toggle"
+                (click)="toggleCosts()"
+                [color]="showCosts ? 'success' : 'medium'">
+                <ion-label>{{ showCosts ? 'Ocultar costos' : 'Ver costos' }}</ion-label>
+              </ion-chip>
+            }
+        </ion-item>
 
 
         @if (loading) {
@@ -96,18 +102,37 @@
 
 
             <!-- Nombre -->
-            @for (campo of campos; track $index) {
+<!--             @for (campo of campos; track $index) {
               <ng-container [matColumnDef]="campo.campo">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header> {{campo.label}} </th>
                 <td (click)="setStock($event,row)" mat-cell *matCellDef="let row"> {{row[campo.campo]}} </td>
               </ng-container>
 
-            }
+            } -->
 
-            <tr style="background: #e3edff;" mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                [ngClass]="getRowClass(row)">
-            </tr>
+              <!-- Contenedores de datos (incluye costo_* para admin) -->
+              @for (campo of campos; track $index) {
+                <ng-container [matColumnDef]="campo.campo">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header> {{ campo.label }} </th>
+
+                  <!-- Click para editar stock SOLO en la columna 'stock' y SOLO si es admin -->
+                  <td mat-cell *matCellDef="let row"
+                      (click)="campo.campo === 'stock' && !vendedor && setStock($event, row)">
+                    {{ row[campo.campo] }}
+                  </td>
+                </ng-container>
+              }
+
+              <!-- Usa el getter 'columns' -->
+              <tr style="background:#e3edff" mat-header-row *matHeaderRowDef="columns"></tr>
+              <tr mat-row
+                  *matRowDef="let row; columns: columns"
+                  tabindex="0" role="button"
+                  (mouseenter)="hovered = row" (mouseleave)="hovered = null"
+                  (focus)="hovered = row" (blur)="hovered = null"
+                  (click)="selected = row"
+                  [ngClass]="[getRowClass(row), hovered === row ? 'is-hover' : '', selected === row ? 'is-selected' : '']">
+              </tr>
 
             <!-- Row shown when there is no matching data. -->
             <tr class="mat-row" *matNoDataRow >
