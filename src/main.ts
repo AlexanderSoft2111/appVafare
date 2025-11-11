@@ -15,9 +15,10 @@ import { getAuth, provideAuth} from '@angular/fire/auth';
 
 import { environment } from './environments/environment';
 
-import { LOCALE_ID } from '@angular/core';
+import { LOCALE_ID, isDevMode } from '@angular/core';
 import localeEs from '@angular/common/locales/es';
 import { registerLocaleData } from '@angular/common';
+import { provideServiceWorker } from '@angular/service-worker';
 
 registerLocaleData(localeEs, 'es');
 
@@ -43,6 +44,9 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(IonicStorageModule.forRoot()),
 
     //  Locale en español
-    { provide: LOCALE_ID, useValue: 'es' },
+    { provide: LOCALE_ID, useValue: 'es' }, provideServiceWorker('ngsw-worker.js', {
+            enabled: !isDevMode(),
+            registrationStrategy: 'registerWhenStable:30000'
+          }),
   ],
 });

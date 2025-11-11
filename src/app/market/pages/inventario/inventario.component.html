@@ -101,15 +101,6 @@
             </ng-container>
 
 
-            <!-- Nombre -->
-<!--             @for (campo of campos; track $index) {
-              <ng-container [matColumnDef]="campo.campo">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header> {{campo.label}} </th>
-                <td (click)="setStock($event,row)" mat-cell *matCellDef="let row"> {{row[campo.campo]}} </td>
-              </ng-container>
-
-            } -->
-
               <!-- Contenedores de datos (incluye costo_* para admin) -->
               @for (campo of campos; track $index) {
                 <ng-container [matColumnDef]="campo.campo">
@@ -117,7 +108,7 @@
 
                   <!-- Click para editar stock SOLO en la columna 'stock' y SOLO si es admin -->
                   <td mat-cell *matCellDef="let row"
-                      (click)="campo.campo === 'stock' && !vendedor && setStock($event, row)">
+                      (click)="setStock($event, row)">
                     {{ row[campo.campo] }}
                   </td>
                 </ng-container>
